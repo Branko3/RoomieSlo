@@ -1,6 +1,5 @@
 package com.roomieslo.app.data.repository
 
-import com.roomieslo.app.data.local.dao.ProfileDao
 import com.roomieslo.app.data.remote.dto.ProfileDto
 import com.roomieslo.app.data.remote.dto.QuestionnaireAnswerDto
 import com.roomieslo.app.domain.model.LifestyleAnswer
@@ -15,13 +14,10 @@ import javax.inject.Singleton
 @Singleton
 class ProfileRepository @Inject constructor(
     private val supabase: SupabaseClient,
-    private val authRepository: AuthRepository,
-    private val profileDao: ProfileDao
+    private val authRepository: AuthRepository
 ) {
 
-    fun observeAvailableProfiles() = profileDao.observeAvailableProfiles()
-
-    /** F03: prebere profil trenutno prijavljenega uporabnika (z odgovori vprašalnika) prek PostgREST. */
+    /** F03: prebere profil trenutno prijavljenega uporabnika (z odgovori vprasalnika) prek PostgREST. */
     suspend fun getMyProfile(): Profile? {
         val uid = authRepository.currentUserId() ?: return null
         val dto = supabase.from("profiles").select {
@@ -46,19 +42,19 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    /** F04: prebere odgovore vprašalnika za dani profil. */
+    /** F04: prebere odgovore vprasalnika za dani profil. */
     suspend fun getAnswersFor(profileId: String): List<LifestyleAnswer> =
         supabase.from("questionnaire_answers").select(Columns.list("profile_id", "question_id", "value", "weight")) {
             filter { eq("profile_id", profileId) }
         }.decodeList<QuestionnaireAnswerDto>().map { it.toDomain() }
 
-    /** F04: odgovori vprašalnika trenutno prijavljenega uporabnika. */
+    /** F04: odgovori vprasalnika trenutno prijavljenega uporabnika. */
     suspend fun getMyAnswers(): List<LifestyleAnswer> {
         val uid = authRepository.currentUserId() ?: return emptyList()
         return getAnswersFor(uid)
     }
 
-    /** F04: shrani (vstavi ali posodobi) odgovore vprašalnika trenutnega uporabnika. */
+    /** F04: shrani (vstavi ali posodobi) odgovore vprasalnika trenutnega uporabnika. */
     suspend fun saveMyAnswers(answers: List<LifestyleAnswer>) {
         val uid = authRepository.currentUserId() ?: return
         val dtos = answers.map {
@@ -68,9 +64,9 @@ class ProfileRepository @Inject constructor(
     }
 
     /**
-     * F12-F13: vsi razpoložljivi profili (razen mojega) skupaj z odgovori vprašalnika,
-     * da lahko odjemalec izračuna združljivost. Odgovori se pridobijo v eni poizvedbi in
-     * združijo po profilu.
+     * F12-F13: vsi razpolozljivi profili (razen mojega) skupaj z odgovori vprasalnika,
+     * da lahko odjemalec izracuna zdruzljivost. Odgovori se pridobijo v eni poizvedbi in
+     * zdruzijo po profilu.
      */
     suspend fun getRecommendationCandidates(): List<Profile> {
         val uid = authRepository.currentUserId()
@@ -102,7 +98,15 @@ class ProfileRepository @Inject constructor(
         }.decodeList<ProfileDto>().associate { it.id to it.displayName }
     }
 
+    /**
+     * Zavestna odlocitev: profili se v tej razlicici NE predpomnijo.
+     *
+     * Predpomnjenje z Room je izvedeno samo za oglase -- v ListingRepository.syncFromRemote().
+     * Razlog: ProfileEntity ne hrani odgovorov vprasalnika (LifestyleAnswer), zato izracun
+     * zdruzljivosti (F12/F13) brez povezave tako ali tako ne bi deloval. Za to bi bila
+     * potrebna dodatna tabela in @Relation, kar presega obseg tega dela.
+     */
     suspend fun syncFromRemote() {
-        // TODO: pridobi profile prek PostgREST in posodobi lokalni predpomnilnik (Room).
+        // Namenoma prazno.
     }
 }

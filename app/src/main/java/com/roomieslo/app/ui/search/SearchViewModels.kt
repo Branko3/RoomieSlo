@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import javax.inject.Inject
 
-/* ---------- Iskanje oglasov po lokaciji in proračunu (F10, F11) ---------- */
+/* ---------- Iskanje oglasov po lokaciji in proracunu (F10, F11) ---------- */
 
 data class SearchUiState(
     val location: String = "",
@@ -82,7 +82,7 @@ class SearchViewModel @Inject constructor(
     }
 }
 
-/* ---------- Priporočeni sostanovalci po združljivosti (F12, F13) ---------- */
+/* ---------- Priporoceni sostanovalci po zdruzljivosti (F12, F13) ---------- */
 
 data class RecommendedUiState(
     val isLoading: Boolean = true,
@@ -107,14 +107,14 @@ class RecommendedProfilesViewModel @Inject constructor(
             uiState = try {
                 val me = profileRepository.getMyProfile()
                 val candidates = profileRepository.getRecommendationCandidates()
-                // F12: izračun združljivosti; F13: razvrstitev padajoče po rezultatu.
+                // F12: izracun zdruzljivosti; F13: razvrstitev padajoce po rezultatu.
                 val scored = candidates.map { candidate ->
                     val score = if (me != null) (calculateCompatibility(me, candidate) * 100).roundToInt() else 0
                     candidate to score
                 }.sortedByDescending { it.second }
                 uiState.copy(isLoading = false, results = scored)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju priporočil.")
+                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju priporocil.")
             }
         }
     }

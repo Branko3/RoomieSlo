@@ -72,7 +72,7 @@ class ChatListViewModel @Inject constructor(
                 load()
                 // load() pocisti errorMessage, zato sporocilo nastavimo sele za njim.
                 if (result is AcceptMatchResult.Conflict) {
-                    uiState = uiState.copy(errorMessage = "Ta zahteva je bila že obravnavana.")
+                    uiState = uiState.copy(errorMessage = "Ta zahteva je bila ze obravnavana.")
                 }
             } catch (e: Exception) {
                 uiState = uiState.copy(errorMessage = e.message)
@@ -124,7 +124,7 @@ class ChatViewModel @Inject constructor(
             uiState = try {
                 uiState.copy(isLoading = false, messages = chatRepository.getMessages(id))
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju sporočil.")
+                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju sporocil.")
             }
         }
     }

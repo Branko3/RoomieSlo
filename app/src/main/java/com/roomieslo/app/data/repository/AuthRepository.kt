@@ -19,7 +19,7 @@ class AuthRepository @Inject constructor(
 
     /**
      * F01: registracija prek Supabase Auth. Ime shranimo kot metapodatek uporabnika;
-     * vrstico v tabeli profiles samodejno ustvari sprožilec handle_new_user (glej supabase/auth_trigger.sql).
+     * vrstico v tabeli profiles samodejno ustvari sprozilec handle_new_user (glej supabase/auth_trigger.sql).
      */
     suspend fun signUp(name: String, email: String, password: String) {
         supabase.auth.signUpWith(Email) {
@@ -51,7 +51,7 @@ class AuthRepository @Inject constructor(
     }
 
     /**
-     * F02: naloži potrdilo o vpisu (vpisnico) v zaseben bucket `vpisnice`.
+     * F02: nalozi potrdilo o vpisu (vpisnico) v zaseben bucket `vpisnice`.
      * Datoteka se shrani pod potjo `{uid}/vpisnica.ext`, tako da je prvi imenik = lastnik
      * (glej supabase/storage_policies.sql). Preverjanje statusa opravi administrator.
      */

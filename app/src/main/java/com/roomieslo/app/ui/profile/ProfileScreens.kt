@@ -72,7 +72,7 @@ fun ProfileScreen(
         }
         state.profile == null -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.errorMessage ?: "Profila ni bilo mogoče naložiti.")
+                Text(state.errorMessage ?: "Profila ni bilo mogoce naloziti.")
             }
         }
         else -> {
@@ -124,7 +124,7 @@ private fun ProfileContent(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.height(0.dp))
-                        Text(" Preverjen študent", style = MaterialTheme.typography.bodySmall)
+                        Text(" Preverjen student", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -141,9 +141,9 @@ private fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("Iščem sostanovalca / sobo", fontWeight = FontWeight.Medium)
+                    Text("Iscem sostanovalca / sobo", fontWeight = FontWeight.Medium)
                     Text(
-                        "Ko je izklopljeno, se tvoj profil ne prikazuje med priporočenimi zadetki.",
+                        "Ko je izklopljeno, se tvoj profil ne prikazuje med priporocenimi zadetki.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -156,9 +156,9 @@ private fun ProfileContent(
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Vprašalnik o življenjskem slogu", fontWeight = FontWeight.Medium)
+                Text("Vprasalnik o zivljenjskem slogu", fontWeight = FontWeight.Medium)
                 Text(
-                    "${profile.lifestyleAnswers.size} od $questionCount vprašanj izpolnjenih",
+                    "${profile.lifestyleAnswers.size} od $questionCount vprasanj izpolnjenih",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -176,7 +176,7 @@ private fun ProfileContent(
             }
         }
         Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onOpenAdmin) { Text("Administratorska plošča") }
+        TextButton(onClick = onOpenAdmin) { Text("Administratorska plosca") }
     }
 
     if (showEditDialog) {
@@ -198,7 +198,7 @@ private fun ProfileContent(
                 }) { Text("Shrani") }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Prekliči") }
+                TextButton(onClick = { showEditDialog = false }) { Text("Preklici") }
             }
         )
     }
@@ -242,7 +242,7 @@ fun LifestyleQuestionnaireScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Vprašalnik o življenjskem slogu",
+            "Vprasalnik o zivljenjskem slogu",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(24.dp)

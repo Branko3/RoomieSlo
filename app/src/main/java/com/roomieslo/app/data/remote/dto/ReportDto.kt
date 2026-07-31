@@ -3,7 +3,7 @@ package com.roomieslo.app.data.remote.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Branje prijave uporabnika (za administratorsko ploščo). */
+/** Branje prijave uporabnika (za administratorsko plosco). */
 @Serializable
 data class ReportDto(
     val id: String,

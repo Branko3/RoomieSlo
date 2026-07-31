@@ -31,7 +31,7 @@ class ProfileViewModel @Inject constructor(
 
     init { load() }
 
-    /** F03: naloži profil prijavljenega uporabnika iz baze. */
+    /** F03: nalozi profil prijavljenega uporabnika iz baze. */
     fun load() {
         uiState = uiState.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
@@ -56,7 +56,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    /** F05: preklopi razpoložljivost (optimisticno + zapis v bazo). */
+    /** F05: preklopi razpolozljivost (optimisticno + zapis v bazo). */
     fun setAvailability(isAvailable: Boolean) {
         val current = uiState.profile ?: return
         uiState = uiState.copy(profile = current.copy(isAvailable = isAvailable))

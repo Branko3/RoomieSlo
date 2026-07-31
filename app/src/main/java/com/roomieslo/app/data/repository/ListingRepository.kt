@@ -60,7 +60,7 @@ class ListingRepository @Inject constructor(
         )
     }
 
-    /** F19: uredi obstoječi oglas. */
+    /** F19: uredi obstojeci oglas. */
     suspend fun updateListing(id: String, location: String, pricePerMonth: Double, description: String) {
         supabase.from("listings").update({
             set("location", location.trim())
@@ -69,12 +69,12 @@ class ListingRepository @Inject constructor(
         }) { filter { eq("id", id) } }
     }
 
-    /** F09: označi oglas kot zaseden/na voljo. */
+    /** F09: oznaci oglas kot zaseden/na voljo. */
     suspend fun markFilled(id: String, filled: Boolean) {
         supabase.from("listings").update({ set("is_filled", filled) }) { filter { eq("id", id) } }
     }
 
-    /** F19: izbriši oglas. */
+    /** F19: izbrisi oglas. */
     suspend fun deleteListing(id: String) {
         supabase.from("listings").delete { filter { eq("id", id) } }
     }

@@ -23,7 +23,7 @@ data class MessageDto(
     )
 }
 
-/** Objekt za vstavljanje novega sporočila (sender_id = trenutni uporabnik). */
+/** Objekt za vstavljanje novega sporocila (sender_id = trenutni uporabnik). */
 @Serializable
 data class NewMessageDto(
     @SerialName("match_id") val matchId: String,

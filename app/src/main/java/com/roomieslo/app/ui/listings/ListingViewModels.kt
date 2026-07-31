@@ -131,7 +131,7 @@ class ListingDetailViewModel @Inject constructor(
         }
     }
 
-    /** F15: pošlji zahtevo za ujemanje lastniku oglasa. */
+    /** F15: poslji zahtevo za ujemanje lastniku oglasa. */
     fun sendMatchRequest() {
         val listing = uiState.listing ?: return
         if (uiState.isRequestSent) return

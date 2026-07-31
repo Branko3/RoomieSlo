@@ -10,7 +10,7 @@ import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** F18: prijava neprimernega uporabnika. F20: administratorska plošča. */
+/** F18: prijava neprimernega uporabnika. F20: administratorska plosca. */
 @Singleton
 class AdminRepository @Inject constructor(
     private val supabase: SupabaseClient,
@@ -39,7 +39,7 @@ class AdminRepository @Inject constructor(
             order("created_at", Order.DESCENDING)
         }.decodeList<ReportDto>()
 
-    /** F20: označi prijavo kot obravnavano / ponovno odpri. */
+    /** F20: oznaci prijavo kot obravnavano / ponovno odpri. */
     suspend fun setReportStatus(reportId: String, status: String) {
         supabase.from("reports").update({ set("status", status) }) { filter { eq("id", reportId) } }
     }

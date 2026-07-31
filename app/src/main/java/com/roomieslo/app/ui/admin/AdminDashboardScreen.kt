@@ -36,7 +36,7 @@ fun AdminDashboardScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Administratorska plošča",
+            "Administratorska plosca",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(24.dp)
@@ -46,7 +46,7 @@ fun AdminDashboardScreen(
                 CircularProgressIndicator()
             }
             !state.isAdmin -> Text(
-                "Nimaš administratorskih pravic.",
+                "Nimas administratorskih pravic.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -80,7 +80,7 @@ fun AdminDashboardScreen(
                             val resolved = report.status != "open"
                             AssistChip(
                                 onClick = { viewModel.toggleStatus(report) },
-                                label = { Text(if (resolved) "Rešeno" else "Odprto") },
+                                label = { Text(if (resolved) "Reseno" else "Odprto") },
                                 colors = if (!resolved) AssistChipDefaults.assistChipColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer
                                 ) else AssistChipDefaults.assistChipColors()

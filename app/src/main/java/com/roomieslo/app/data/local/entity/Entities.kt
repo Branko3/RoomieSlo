@@ -23,7 +23,7 @@ data class ListingEntity(
     val lastSyncedAt: Long
 )
 
-/** version: polje za opticno zaklepanje pri socasnih ujemanjih (glej diplomsko delo). */
+/** version: polje za optimisticno zaklepanje pri socasnih ujemanjih (glej diplomsko delo). */
 @Entity(tableName = "matches")
 data class MatchEntity(
     @PrimaryKey val id: String,

@@ -15,9 +15,9 @@ sealed interface AcceptMatchResult {
 }
 
 /**
- * F15: zahteva za ujemanje (pošlji / sprejmi / zavrni).
+ * F15: zahteva za ujemanje (poslji / sprejmi / zavrni).
  *
- * Opomba: optično zaklepanje nad poljem `version` (napredna tehnika) v tej različici
+ * Opomba: opticno zaklepanje nad poljem `version` (napredna tehnika) v tej razlicici
  * ni izvedeno — sprejem je preprosta posodobitev statusa.
  */
 @Singleton
@@ -26,7 +26,7 @@ class MatchRepository @Inject constructor(
     private val authRepository: AuthRepository
 ) {
 
-    /** F15: pošlji zahtevo za ujemanje uporabniku (npr. lastniku oglasa). */
+    /** F15: poslji zahtevo za ujemanje uporabniku (npr. lastniku oglasa). */
     suspend fun sendRequest(toUserId: String) {
         val uid = authRepository.currentUserId() ?: return
         supabase.from("matches").insert(NewMatchDto(userIdA = uid, userIdB = toUserId))
@@ -71,7 +71,15 @@ class MatchRepository @Inject constructor(
 
     fun currentUserId(): String? = authRepository.currentUserId()
 
+    /**
+     * Zavestna odlocitev: ujemanja se v tej razlicici NE predpomnijo.
+     *
+     * Predpomnjenje z Room je izvedeno samo za oglase -- v ListingRepository.syncFromRemote().
+     * Razlog: stanje ujemanja se pogosto spreminja in mora biti sveze -- acceptMatch() se
+     * zanasa na to, da je vir resnice streznik (pogojna posodobitev status = 'pending').
+     * Predpomnjen status bi lahko prikazal zahtevo, ki jo je druga stran ze obravnavala.
+     */
     suspend fun syncFromRemote() {
-        // TODO: pridobi seznam ujemanj prek PostgREST in posodobi lokalni predpomnilnik (Room).
+        // Namenoma prazno.
     }
 }

@@ -23,7 +23,7 @@ data class MatchDto(
     )
 }
 
-/** Objekt za vstavljanje nove zahteve za ujemanje (user_id_a = pošiljatelj). */
+/** Objekt za vstavljanje nove zahteve za ujemanje (user_id_a = posiljatelj). */
 @Serializable
 data class NewMatchDto(
     @SerialName("user_id_a") val userIdA: String,

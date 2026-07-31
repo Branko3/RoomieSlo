@@ -32,7 +32,7 @@ class AcademicVerificationViewModel @Inject constructor(
     var uiState by mutableStateOf(AcademicVerificationUiState())
         private set
 
-    /** F02: preberi vsebino izbrane datoteke in jo naloži v bucket `vpisnice`. */
+    /** F02: preberi vsebino izbrane datoteke in jo nalozi v bucket `vpisnice`. */
     fun upload(uri: Uri) {
         uiState = uiState.copy(isUploading = true, isUploaded = false, errorMessage = null, fileName = fileNameOf(uri))
         viewModelScope.launch {
@@ -45,7 +45,7 @@ class AcademicVerificationViewModel @Inject constructor(
                 }
                 val bytes = withContext(Dispatchers.IO) {
                     context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                } ?: throw IllegalStateException("Datoteke ni bilo mogoče prebrati.")
+                } ?: throw IllegalStateException("Datoteke ni bilo mogoce prebrati.")
                 authRepository.uploadAcademicProof(bytes, extension)
                 uiState.copy(isUploading = false, isUploaded = true)
             } catch (e: Exception) {

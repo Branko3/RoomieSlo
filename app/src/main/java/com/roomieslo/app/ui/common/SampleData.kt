@@ -8,13 +8,13 @@ import com.roomieslo.app.domain.model.MatchStatus
 import com.roomieslo.app.domain.model.Message
 import com.roomieslo.app.domain.model.Profile
 
-/** Vzorčni podatki za predogled zaslonov (Compose Preview) in vizualni razvoj vmesnika. */
+/** Vzorcni podatki za predogled zaslonov (Compose Preview) in vizualni razvoj vmesnika. */
 object SampleData {
 
     val lifestyleQuestions = listOf(
-        "Jutranji ali nočni tip?" to "q_wake",
+        "Jutranji ali nocni tip?" to "q_wake",
         "Pogostost gostov v stanovanju" to "q_guests",
-        "Odnos do čistoče skupnih prostorov" to "q_cleanliness",
+        "Odnos do cistoce skupnih prostorov" to "q_cleanliness",
         "Kajenje v stanovanju" to "q_smoking",
         "Glasnost (glasba, klici)" to "q_noise"
     )
@@ -41,10 +41,10 @@ object SampleData {
     )
 
     val listings = listOf(
-        Listing("l1", "u2", "Ljubljana - Bežigrad", 320.0, "Svetla soba v skupnem stanovanju blizu FRI, na voljo od septembra.", false),
-        Listing("l2", "u3", "Ljubljana - Center", 450.0, "Soba v prenovljenem stanovanju, 5 min od Prešernovega trga.", false),
-        Listing("l3", "u4", "Ljubljana - Šiška", 280.0, "Skupno bivanje s tremi študenti, kuhinja in dnevna soba v skupni rabi.", false),
-        Listing("l4", "u5", "Ljubljana - Vič", 350.0, "Soba blizu študentskih naselij, dobra povezava z avtobusom.", true)
+        Listing("l1", "u2", "Ljubljana - Bezigrad", 320.0, "Svetla soba v skupnem stanovanju blizu FRI, na voljo od septembra.", false),
+        Listing("l2", "u3", "Ljubljana - Center", 450.0, "Soba v prenovljenem stanovanju, 5 min od Presernovega trga.", false),
+        Listing("l3", "u4", "Ljubljana - siska", 280.0, "Skupno bivanje s tremi studenti, kuhinja in dnevna soba v skupni rabi.", false),
+        Listing("l4", "u5", "Ljubljana - Vic", 350.0, "Soba blizu studentskih naselij, dobra povezava z avtobusom.", true)
     )
 
     val chats = listOf(
@@ -54,8 +54,8 @@ object SampleData {
     )
 
     val messages = listOf(
-        Message("msg1", "m1", "u2", "Pozdravljen, me zanima, ali je soba še na voljo?", DeliveryStatus.READ),
-        Message("msg2", "m1", "u1", "Živjo! Ja, je še prosta. Kdaj bi si jo želel ogledati?", DeliveryStatus.READ),
+        Message("msg1", "m1", "u2", "Pozdravljen, me zanima, ali je soba se na voljo?", DeliveryStatus.READ),
+        Message("msg2", "m1", "u1", "zivjo! Ja, je se prosta. Kdaj bi si jo zelel ogledati?", DeliveryStatus.READ),
         Message("msg3", "m1", "u2", "Se vidiva jutri ob 17h za ogled?", DeliveryStatus.DELIVERED)
     )
 }

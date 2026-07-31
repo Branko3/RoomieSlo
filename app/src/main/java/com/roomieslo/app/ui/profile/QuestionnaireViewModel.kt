@@ -12,7 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** Stanje zaslona vprašalnika (F04). */
+/** Stanje zaslona vprasalnika (F04). */
 data class QuestionnaireUiState(
     val isLoading: Boolean = true,
     val values: Map<String, Float> = emptyMap(),
@@ -26,7 +26,7 @@ class QuestionnaireViewModel @Inject constructor(
     private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
-    /** Pari (besedilo vprašanja, id vprašanja) — nabor vprašanj je fiksen. */
+    /** Pari (besedilo vprasanja, id vprasanja) — nabor vprasanj je fiksen. */
     val questions: List<Pair<String, String>> = SampleData.lifestyleQuestions
 
     var uiState by mutableStateOf(QuestionnaireUiState())
@@ -38,7 +38,7 @@ class QuestionnaireViewModel @Inject constructor(
         viewModelScope.launch {
             uiState = try {
                 val existing = profileRepository.getMyAnswers().associate { it.questionId to it.value }
-                // manjkajoča vprašanja dobijo nevtralno privzeto vrednost 0.5
+                // manjkajoca vprasanja dobijo nevtralno privzeto vrednost 0.5
                 val values = questions.associate { (_, id) -> id to (existing[id] ?: 0.5f) }
                 uiState.copy(isLoading = false, values = values)
             } catch (e: Exception) {

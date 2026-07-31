@@ -24,7 +24,7 @@ data class ListingDto(
     )
 }
 
-/** Objekt za vstavljanje novega oglasa (brez id/version/created_at — te določi baza). */
+/** Objekt za vstavljanje novega oglasa (brez id/version/created_at — te doloci baza). */
 @Serializable
 data class NewListingDto(
     @SerialName("owner_id") val ownerId: String,

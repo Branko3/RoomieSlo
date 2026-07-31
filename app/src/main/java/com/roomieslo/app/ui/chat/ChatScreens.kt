@@ -56,7 +56,7 @@ fun ChatListScreen(
                 CircularProgressIndicator()
             }
             state.rows.isEmpty() -> Text(
-                state.errorMessage ?: "Nimaš še ujemanj. Pošlji zahtevo iz oglasa.",
+                state.errorMessage ?: "Nimas se ujemanj. Poslji zahtevo iz oglasa.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -80,7 +80,7 @@ fun ChatListScreen(
                             Text(
                                 when (row.match.status) {
                                     MatchStatus.ACCEPTED -> "Sprejeto — odpri klepet"
-                                    MatchStatus.PENDING -> if (row.iAmRecipient) "Nova zahteva za ujemanje" else "Čaka na odgovor"
+                                    MatchStatus.PENDING -> if (row.iAmRecipient) "Nova zahteva za ujemanje" else "caka na odgovor"
                                     MatchStatus.REJECTED -> "Zavrnjeno"
                                 },
                                 style = MaterialTheme.typography.bodySmall,
@@ -152,11 +152,11 @@ fun ChatScreen(
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = viewModel::onDraftChange,
-                placeholder = { Text("Napiši sporočilo...") },
+                placeholder = { Text("Napisi sporocilo...") },
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = { viewModel.send() }) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Pošlji")
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Poslji")
             }
         }
     }

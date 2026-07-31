@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Prenosni objekt za tabelo `public.questionnaire_answers` (PostgREST).
- * Ena vrstica = en odgovor uporabnika na eno vprašanje vprašalnika (F04).
+ * Ena vrstica = en odgovor uporabnika na eno vprasanje vprasalnika (F04).
  */
 @Serializable
 data class QuestionnaireAnswerDto(

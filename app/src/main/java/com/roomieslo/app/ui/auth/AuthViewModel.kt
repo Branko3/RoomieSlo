@@ -33,7 +33,7 @@ class AuthViewModel @Inject constructor(
         authRepository.signUp(name.trim(), email.trim(), password)
     }
 
-    /** UI potrdi, da je obravnaval uspeh (da se navigacija ne sproži večkrat). */
+    /** UI potrdi, da je obravnaval uspeh (da se navigacija ne sprozi veckrat). */
     fun consumeSuccess() {
         uiState = uiState.copy(isSuccess = false)
     }
@@ -46,7 +46,7 @@ class AuthViewModel @Inject constructor(
                 block()
                 uiState.copy(isLoading = false, isSuccess = true)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Prišlo je do napake.")
+                uiState.copy(isLoading = false, errorMessage = e.message ?: "Prislo je do napake.")
             }
         }
     }

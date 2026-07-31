@@ -10,11 +10,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * F14: klepet med udeležencema ujemanja.
+ * F14: klepet med udelezencema ujemanja.
  *
- * Opomba: sporočila se berejo/pošiljajo prek PostgREST (poizvedba na zahtevo).
- * Sprejem v realnem času prek WebSocket z logiko ponovne vzpostavitve povezave
- * (napredna tehnika) v tej različici ni izveden.
+ * Opomba: sporocila se berejo/posiljajo prek PostgREST (poizvedba na zahtevo).
+ * Sprejem v realnem casu prek WebSocket z logiko ponovne vzpostavitve povezave
+ * (napredna tehnika) v tej razlicici ni izveden.
  */
 @Singleton
 class ChatRepository @Inject constructor(
@@ -22,14 +22,14 @@ class ChatRepository @Inject constructor(
     private val authRepository: AuthRepository
 ) {
 
-    /** F14: vsa sporočila za dano ujemanje, urejena po času. */
+    /** F14: vsa sporocila za dano ujemanje, urejena po casu. */
     suspend fun getMessages(matchId: String): List<Message> =
         supabase.from("messages").select {
             filter { eq("match_id", matchId) }
             order("sent_at", Order.ASCENDING)
         }.decodeList<MessageDto>().map { it.toDomain() }
 
-    /** F14: pošlji sporočilo v dano ujemanje. */
+    /** F14: poslji sporocilo v dano ujemanje. */
     suspend fun sendMessage(matchId: String, body: String) {
         val uid = authRepository.currentUserId() ?: return
         supabase.from("messages").insert(NewMessageDto(matchId = matchId, senderId = uid, body = body))
