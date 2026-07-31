@@ -27,7 +27,11 @@ data class ListingEntity(
     val lastSyncedAt: Long
 )
 
-/** version: polje za optimisticno zaklepanje pri socasnih ujemanjih (glej diplomsko delo). */
+/**
+ * Polje `version` je rezervirano za optimisticno zaklepanje z verzioniranjem, a se trenutno
+ * ne uporablja: MatchRepository.acceptMatch() dosega enak ucinek s pogojnim UPDATE
+ * na polju `status`, brez dodatnega stevca. Tabela se zaenkrat tudi ne predpomni.
+ */
 @Entity(tableName = "matches")
 data class MatchEntity(
     @PrimaryKey val id: String,

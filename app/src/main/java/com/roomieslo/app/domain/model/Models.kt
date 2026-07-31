@@ -29,7 +29,9 @@ data class Listing(
 /** F15 */
 enum class MatchStatus { PENDING, ACCEPTED, REJECTED }
 
-/** F15: vsebuje polje version za optimisticno zaklepanje pri socasnih ujemanjih. */
+/** F15: polje `version` je rezervirano za verzioniranje,
+ * a se trenutno ne uporablja -- znotraj MatchRepository.acceptMatch(). */
+
 data class Match(
     val id: String,
     val userIdA: String,
