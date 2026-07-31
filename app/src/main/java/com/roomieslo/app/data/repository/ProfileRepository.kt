@@ -1,0 +1,108 @@
+package com.roomieslo.app.data.repository
+
+import com.roomieslo.app.data.local.dao.ProfileDao
+import com.roomieslo.app.data.remote.dto.ProfileDto
+import com.roomieslo.app.data.remote.dto.QuestionnaireAnswerDto
+import com.roomieslo.app.domain.model.LifestyleAnswer
+import com.roomieslo.app.domain.model.Profile
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/** F03-F05, F12-F13: uporabniski profil, vprasalnik o zivljenjskem slogu, priporocila. */
+@Singleton
+class ProfileRepository @Inject constructor(
+    private val supabase: SupabaseClient,
+    private val authRepository: AuthRepository,
+    private val profileDao: ProfileDao
+) {
+
+    fun observeAvailableProfiles() = profileDao.observeAvailableProfiles()
+
+    /** F03: prebere profil trenutno prijavljenega uporabnika (z odgovori vprašalnika) prek PostgREST. */
+    suspend fun getMyProfile(): Profile? {
+        val uid = authRepository.currentUserId() ?: return null
+        val dto = supabase.from("profiles").select {
+            filter { eq("id", uid) }
+        }.decodeSingleOrNull<ProfileDto>() ?: return null
+        return dto.toDomain(lifestyleAnswers = getAnswersFor(uid))
+    }
+
+    /** F03/F19: posodobi prikazano ime trenutnega uporabnika. */
+    suspend fun updateDisplayName(name: String) {
+        val uid = authRepository.currentUserId() ?: return
+        supabase.from("profiles").update({ set("display_name", name) }) {
+            filter { eq("id", uid) }
+        }
+    }
+
+    /** F05: preklopi status razpolozljivosti (prikaz med priporocenimi zadetki). */
+    suspend fun setAvailability(isAvailable: Boolean) {
+        val uid = authRepository.currentUserId() ?: return
+        supabase.from("profiles").update({ set("is_available", isAvailable) }) {
+            filter { eq("id", uid) }
+        }
+    }
+
+    /** F04: prebere odgovore vprašalnika za dani profil. */
+    suspend fun getAnswersFor(profileId: String): List<LifestyleAnswer> =
+        supabase.from("questionnaire_answers").select(Columns.list("profile_id", "question_id", "value", "weight")) {
+            filter { eq("profile_id", profileId) }
+        }.decodeList<QuestionnaireAnswerDto>().map { it.toDomain() }
+
+    /** F04: odgovori vprašalnika trenutno prijavljenega uporabnika. */
+    suspend fun getMyAnswers(): List<LifestyleAnswer> {
+        val uid = authRepository.currentUserId() ?: return emptyList()
+        return getAnswersFor(uid)
+    }
+
+    /** F04: shrani (vstavi ali posodobi) odgovore vprašalnika trenutnega uporabnika. */
+    suspend fun saveMyAnswers(answers: List<LifestyleAnswer>) {
+        val uid = authRepository.currentUserId() ?: return
+        val dtos = answers.map {
+            QuestionnaireAnswerDto(profileId = uid, questionId = it.questionId, value = it.value, weight = it.weight)
+        }
+        supabase.from("questionnaire_answers").upsert(dtos) { onConflict = "profile_id,question_id" }
+    }
+
+    /**
+     * F12-F13: vsi razpoložljivi profili (razen mojega) skupaj z odgovori vprašalnika,
+     * da lahko odjemalec izračuna združljivost. Odgovori se pridobijo v eni poizvedbi in
+     * združijo po profilu.
+     */
+    suspend fun getRecommendationCandidates(): List<Profile> {
+        val uid = authRepository.currentUserId()
+        val profiles = supabase.from("profiles").select {
+            filter {
+                eq("is_available", true)
+                if (uid != null) neq("id", uid)
+            }
+        }.decodeList<ProfileDto>()
+        if (profiles.isEmpty()) return emptyList()
+
+        val ids = profiles.map { it.id }
+        val answers = supabase.from("questionnaire_answers")
+            .select(Columns.list("profile_id", "question_id", "value", "weight")) {
+                filter { isIn("profile_id", ids) }
+            }.decodeList<QuestionnaireAnswerDto>()
+            .groupBy { it.profileId }
+
+        return profiles.map { p ->
+            p.toDomain(lifestyleAnswers = answers[p.id]?.map { it.toDomain() } ?: emptyList())
+        }
+    }
+
+    /** Prikazana imena za dani nabor id-jev (za seznam klepetov/ujemanj). */
+    suspend fun getDisplayNames(ids: List<String>): Map<String, String> {
+        if (ids.isEmpty()) return emptyMap()
+        return supabase.from("profiles").select(Columns.list("id", "display_name")) {
+            filter { isIn("id", ids) }
+        }.decodeList<ProfileDto>().associate { it.id to it.displayName }
+    }
+
+    suspend fun syncFromRemote() {
+        // TODO: pridobi profile prek PostgREST in posodobi lokalni predpomnilnik (Room).
+    }
+}
