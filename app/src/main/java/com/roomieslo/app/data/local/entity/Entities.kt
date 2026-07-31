@@ -1,6 +1,7 @@
 package com.roomieslo.app.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "profiles")
@@ -12,7 +13,10 @@ data class ProfileEntity(
     val lastSyncedAt: Long
 )
 
-@Entity(tableName = "listings")
+@Entity(
+    tableName = "listings",
+    indices = [Index(value = ["isFilled", "pricePerMonth"])]
+)
 data class ListingEntity(
     @PrimaryKey val id: String,
     val ownerId: String,

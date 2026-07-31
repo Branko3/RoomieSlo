@@ -11,7 +11,7 @@ import com.roomieslo.app.data.local.entity.ProfileEntity
 
 @Database(
     entities = [ProfileEntity::class, ListingEntity::class, MatchEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class RoomieSloDatabase : RoomDatabase() {

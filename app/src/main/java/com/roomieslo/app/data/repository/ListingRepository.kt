@@ -31,9 +31,11 @@ class ListingRepository @Inject constructor(
         listingDao.observeListings(location, maxPrice)
             .map {rows -> rows.map {it.toDomain() } }
 
-    suspend fun syncFromRemote(location : String? = null, maxPrice: Double? = null){
-        val fresh = getListings(location, maxPrice) //fetch
-        listingDao.upsertAll(fresh.map { it.toEntity() }) // vpisi v Room
+    /** Osvezi predpomnilnik s streznika in odstrani zapise, ki jih streznik ne vraca vec. */
+    suspend fun syncFromRemote(location: String? = null, maxPrice: Double? = null) {
+        val now = System.currentTimeMillis()
+        val fresh = getListings(location, maxPrice)
+        listingDao.syncListings(fresh.map { it.toEntity(now) }, cutoff = now - STALE_AFTER_MS)
     }
 
     /** F07/F10/F11: seznam oglasov (samo nezasedeni), z izbirnim filtrom lokacije in cene. */
@@ -82,4 +84,8 @@ class ListingRepository @Inject constructor(
     /** Ali je trenutni uporabnik lastnik danega oglasa (za prikaz gumbov urejanja). */
     fun currentUserId(): String? = authRepository.currentUserId()
 
+    companion object {
+        /** Zapisi, ki jih sinhronizacija ni osvezila 7 dni, se odstranijo iz predpomnilnika. */
+        private const val STALE_AFTER_MS = 7L * 24 * 60 * 60 * 1000
+    }
 }
