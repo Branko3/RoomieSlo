@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.AuthRepository
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,13 @@ class AcademicVerificationViewModel @Inject constructor(
                 authRepository.uploadAcademicProof(bytes, extension)
                 uiState.copy(isUploading = false, isUploaded = true)
             } catch (e: Exception) {
-                uiState.copy(isUploading = false, errorMessage = e.message ?: "Nalaganje ni uspelo.")
+                // IllegalStateException zgoraj nosi nase sporocilo, zato ga obdrzimo.
+                uiState.copy(
+                    isUploading = false,
+                    errorMessage = e.uporabnisko(
+                        if (e is IllegalStateException) e.message ?: "Nalaganje ni uspelo." else "Nalaganje ni uspelo."
+                    )
+                )
             }
         }
     }

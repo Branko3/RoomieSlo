@@ -10,6 +10,7 @@ import com.roomieslo.app.data.repository.ProfileRepository
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.domain.model.Profile
 import com.roomieslo.app.domain.usecase.CalculateCompatibilityScoreUseCase
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -54,7 +55,10 @@ class SearchViewModel @Inject constructor(
         // Zajamemo trenutne filtre: opazovalec zivi dlje, uiState se medtem lahko spremeni.
         val loc = uiState.location.trim()
         val min = uiState.minPrice
-        val max = uiState.maxPrice.toDouble()
+        // Zgornji polozaj drsnika pomeni "brez zgornje meje": Room dobi neomejeno
+        // vrednost, streznik pa null, da filtra cene sploh ne doda.
+        val brezMeje = uiState.maxPrice >= NAJVECJA_CENA
+        val max = if (brezMeje) Double.MAX_VALUE else uiState.maxPrice.toDouble()
 
         uiState = uiState.copy(isLoading = true, hasSearched = true, errorMessage = null)
 
@@ -70,7 +74,7 @@ class SearchViewModel @Inject constructor(
         //    zato tu rezultatov ni treba nastavljati rocno.
         viewModelScope.launch {
             uiState = try {
-                listingRepository.syncFromRemote(loc.ifBlank { null }, max)
+                listingRepository.syncFromRemote(loc.ifBlank { null }, if (brezMeje) null else max)
                 uiState.copy(isLoading = false)
             } catch (e: Exception) {
                 uiState.copy(
@@ -79,6 +83,11 @@ class SearchViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    companion object {
+        /** Zgornji polozaj drsnika; pomeni iskanje brez zgornje meje cene. */
+        const val NAJVECJA_CENA = 800f
     }
 }
 
@@ -114,7 +123,7 @@ class RecommendedProfilesViewModel @Inject constructor(
                 }.sortedByDescending { it.second }
                 uiState.copy(isLoading = false, results = scored)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju priporocil.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju priporocil."))
             }
         }
     }

@@ -26,12 +26,29 @@ class ListingRepository @Inject constructor(
     private val authRepository: AuthRepository,
     private val listingDao : ListingDao
 ) {
-    /** Caching logika, branje iz cache-a, UI gleda **/
+    /** Branje iz predpomnilnika -- to opazuje UI, ne omrezja. */
     fun observeListings(location: String, maxPrice: Double): Flow<List<Listing>> =
         listingDao.observeListings(location, maxPrice)
             .map {rows -> rows.map {it.toDomain() } }
 
-    /** Osvezi predpomnilnik s streznika in odstrani zapise, ki jih streznik ne vraca vec. */
+    /** F07: vsi nezasedeni oglasi iz predpomnilnika, brez filtrov. */
+    fun observeAllListings(): Flow<List<Listing>> =
+        listingDao.observeAll().map { rows -> rows.map { it.toDomain() } }
+
+    /**
+     * F07: polna sinhronizacija brez filtrov. Streznik je merodajen za vse nezasedene
+     * oglase, zato izbrisani oglasi iz predpomnilnika izginejo takoj.
+     */
+    suspend fun syncAllFromRemote() {
+        val now = System.currentTimeMillis()
+        val fresh = getListings()
+        listingDao.replaceAll(fresh.map { it.toEntity(now) })
+    }
+
+    /**
+     * Osvezi predpomnilnik za dano iskanje. Ker je poizvedba filtrirana, zapisov, ki
+     * filtru ne ustrezajo, ne smemo brisati -- odstranijo se sele po zastaranju.
+     */
     suspend fun syncFromRemote(location: String? = null, maxPrice: Double? = null) {
         val now = System.currentTimeMillis()
         val fresh = getListings(location, maxPrice)

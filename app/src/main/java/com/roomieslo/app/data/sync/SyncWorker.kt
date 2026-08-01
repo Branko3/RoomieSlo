@@ -27,7 +27,7 @@ class SyncWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return try {
             profileRepository.syncFromRemote()
-            listingRepository.syncFromRemote()
+            listingRepository.syncAllFromRemote()
             matchRepository.syncFromRemote()
             Result.success()
         } catch (e: Exception) {

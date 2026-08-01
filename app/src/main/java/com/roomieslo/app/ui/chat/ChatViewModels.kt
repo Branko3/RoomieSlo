@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roomieslo.app.data.realtime.ChatRealtimeService
 import com.roomieslo.app.data.repository.AcceptMatchResult
 import com.roomieslo.app.data.repository.ChatRepository
 import com.roomieslo.app.data.repository.MatchRepository
@@ -13,6 +14,7 @@ import com.roomieslo.app.data.repository.ProfileRepository
 import com.roomieslo.app.domain.model.Match
 import com.roomieslo.app.domain.model.MatchStatus
 import com.roomieslo.app.domain.model.Message
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -60,7 +62,7 @@ class ChatListViewModel @Inject constructor(
                 }
                 uiState.copy(isLoading = false, rows = rows)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju ujemanj.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju ujemanj."))
             }
         }
     }
@@ -75,7 +77,7 @@ class ChatListViewModel @Inject constructor(
                     uiState = uiState.copy(errorMessage = "Ta zahteva je bila ze obravnavana.")
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoce sprejeti."))
             }
         }
     }
@@ -86,7 +88,7 @@ class ChatListViewModel @Inject constructor(
                 matchRepository.rejectMatch(matchId)
                 load()
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoce zavrniti."))
             }
         }
     }
@@ -105,6 +107,7 @@ data class ChatUiState(
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
+    private val chatRealtimeService: ChatRealtimeService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -113,7 +116,26 @@ class ChatViewModel @Inject constructor(
     var uiState by mutableStateOf(ChatUiState(myUserId = chatRepository.currentUserId()))
         private set
 
-    init { load() }
+    init {
+        load()
+        observeRealtime()
+    }
+
+    /**
+     * F14: sprejem novih sporocil v realnem casu.
+     * Logika ponovne vzpostavitve povezave je v ChatRealtimeService.
+     */
+    private fun observeRealtime() {
+        val id = matchId ?: return
+        viewModelScope.launch {
+            chatRealtimeService.observeMessages(id).collect { novo ->
+                // Isto sporocilo lahko pride tudi prek load(), zato podvojitve zavrzemo.
+                if (uiState.messages.none { it.id == novo.id }) {
+                    uiState = uiState.copy(messages = uiState.messages + novo)
+                }
+            }
+        }
+    }
 
     fun load() {
         val id = matchId ?: run {
@@ -124,7 +146,7 @@ class ChatViewModel @Inject constructor(
             uiState = try {
                 uiState.copy(isLoading = false, messages = chatRepository.getMessages(id))
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju sporocil.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju sporocil."))
             }
         }
     }
@@ -141,7 +163,7 @@ class ChatViewModel @Inject constructor(
                 chatRepository.sendMessage(id, body)
                 load()
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Sporocila ni bilo mogoce poslati."))
             }
         }
     }

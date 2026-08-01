@@ -10,7 +10,9 @@ import com.roomieslo.app.data.repository.FavoriteRepository
 import com.roomieslo.app.data.repository.ListingRepository
 import com.roomieslo.app.data.repository.MatchRepository
 import com.roomieslo.app.domain.model.Listing
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,13 +32,40 @@ class ListingListViewModel @Inject constructor(
     var uiState by mutableStateOf(ListingListUiState())
         private set
 
+    private var observeJob: Job? = null
+
+    init { opazujPredpomnilnik() }
+
+    /**
+     * Predpomnilnik opazujemo enkrat ob nastanku; Room sam odda nove podatke
+     * po vsaki sinhronizaciji, zato seznama ni treba nastavljati rocno.
+     */
+    private fun opazujPredpomnilnik() {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            listingRepository.observeAllListings().collect { cached ->
+                uiState = uiState.copy(isLoading = false, listings = cached)
+            }
+        }
+    }
+
+    /** Osvezi s streznika. Ob napaki ostanejo prikazani predpomnjeni oglasi. */
     fun load() {
-        uiState = uiState.copy(isLoading = true, errorMessage = null)
+        uiState = uiState.copy(errorMessage = null)
         viewModelScope.launch {
             uiState = try {
-                uiState.copy(isLoading = false, listings = listingRepository.getListings())
+                listingRepository.syncAllFromRemote()
+                uiState.copy(isLoading = false)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju oglasov.")
+                uiState.copy(
+                    isLoading = false,
+                    // Ce predpomnilnik se ni prazen, napaka ni usodna -- povemo le, da so podatki shranjeni.
+                    errorMessage = if (uiState.listings.isEmpty()) {
+                        e.uporabnisko("Napaka pri nalaganju oglasov.")
+                    } else {
+                        "Ni povezave -- prikazani so shranjeni podatki."
+                    }
+                )
             }
         }
     }
@@ -86,7 +115,7 @@ class ListingDetailViewModel @Inject constructor(
                     isFavorite = if (listing != null) favoriteRepository.isFavorite(listing.id) else false
                 )
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju oglasa.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju oglasa."))
             }
         }
     }
@@ -101,7 +130,7 @@ class ListingDetailViewModel @Inject constructor(
                 if (newValue) favoriteRepository.addFavorite(listing.id)
                 else favoriteRepository.removeFavorite(listing.id)
             } catch (e: Exception) {
-                uiState = uiState.copy(isFavorite = !newValue, errorMessage = e.message)
+                uiState = uiState.copy(isFavorite = !newValue, errorMessage = e.uporabnisko("Priljubljenih ni bilo mogoce posodobiti."))
             }
         }
     }
@@ -114,7 +143,7 @@ class ListingDetailViewModel @Inject constructor(
             try {
                 listingRepository.markFilled(listing.id, newValue)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Stanja oglasa ni bilo mogoce spremeniti."))
             }
         }
     }
@@ -126,7 +155,7 @@ class ListingDetailViewModel @Inject constructor(
                 listingRepository.deleteListing(listing.id)
                 uiState = uiState.copy(isDeleted = true)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Oglasa ni bilo mogoce izbrisati."))
             }
         }
     }
@@ -140,7 +169,7 @@ class ListingDetailViewModel @Inject constructor(
             try {
                 matchRepository.sendRequest(listing.ownerId)
             } catch (e: Exception) {
-                uiState = uiState.copy(isRequestSent = false, errorMessage = e.message)
+                uiState = uiState.copy(isRequestSent = false, errorMessage = e.uporabnisko("Zahteve ni bilo mogoce poslati."))
             }
         }
     }
@@ -204,7 +233,7 @@ class CreateListingViewModel @Inject constructor(
                 }
                 uiState.copy(isSaving = false, isSaved = true)
             } catch (e: Exception) {
-                uiState.copy(isSaving = false, errorMessage = e.message ?: "Shranjevanje ni uspelo.")
+                uiState.copy(isSaving = false, errorMessage = e.uporabnisko("Shranjevanje ni uspelo."))
             }
         }
     }

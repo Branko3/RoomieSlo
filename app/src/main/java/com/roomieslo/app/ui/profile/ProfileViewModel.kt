@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.AuthRepository
 import com.roomieslo.app.data.repository.ProfileRepository
 import com.roomieslo.app.domain.model.Profile
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,7 +39,7 @@ class ProfileViewModel @Inject constructor(
             uiState = try {
                 uiState.copy(isLoading = false, profile = profileRepository.getMyProfile())
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju profila.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju profila."))
             }
         }
     }
@@ -51,7 +52,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 profileRepository.updateDisplayName(name.trim())
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message ?: "Shranjevanje ni uspelo.")
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Shranjevanje ni uspelo."))
             }
         }
     }
@@ -64,7 +65,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 profileRepository.setAvailability(isAvailable)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message ?: "Shranjevanje ni uspelo.")
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Shranjevanje ni uspelo."))
             }
         }
     }

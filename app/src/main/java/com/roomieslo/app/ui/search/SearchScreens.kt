@@ -57,11 +57,13 @@ fun SearchScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(20.dp))
-        Text("Proracun: ${state.minPrice.toInt()}-${state.maxPrice.toInt()} EUR", fontWeight = FontWeight.Medium)
+        val zgornjaMeja = if (state.maxPrice >= SearchViewModel.NAJVECJA_CENA) "brez meje"
+            else "${state.maxPrice.toInt()} EUR"
+        Text("Proracun: ${state.minPrice.toInt()} - $zgornjaMeja", fontWeight = FontWeight.Medium)
         RangeSlider(
             value = state.minPrice..state.maxPrice,
             onValueChange = viewModel::onPriceRangeChange,
-            valueRange = 100f..800f
+            valueRange = 100f..SearchViewModel.NAJVECJA_CENA
         )
         Spacer(Modifier.height(12.dp))
         Button(

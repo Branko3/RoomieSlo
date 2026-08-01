@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.AdminRepository
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,7 +47,7 @@ class ReportViewModel @Inject constructor(
                 adminRepository.reportUser(target, uiState.reason, uiState.description)
                 uiState.copy(isSubmitting = false, isSubmitted = true)
             } catch (e: Exception) {
-                uiState.copy(isSubmitting = false, errorMessage = e.message ?: "Prijava ni bila poslana.")
+                uiState.copy(isSubmitting = false, errorMessage = e.uporabnisko("Prijava ni bila poslana."))
             }
         }
     }

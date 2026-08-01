@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.remote.dto.ReportDto
 import com.roomieslo.app.data.repository.AdminRepository
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +37,7 @@ class AdminViewModel @Inject constructor(
                 val reports = if (admin) adminRepository.listReports() else emptyList()
                 uiState.copy(isLoading = false, isAdmin = admin, reports = reports)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju prijav.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju prijav."))
             }
         }
     }
@@ -49,7 +50,7 @@ class AdminViewModel @Inject constructor(
                 adminRepository.setReportStatus(report.id, newStatus)
                 load()
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Statusa prijave ni bilo mogoce spremeniti."))
             }
         }
     }

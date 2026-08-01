@@ -25,6 +25,10 @@ interface ListingDao {
     @Query("SELECT * FROM listings WHERE isFilled = 0 AND location LIKE '%' || :location || '%' AND pricePerMonth <= :maxPrice")
     fun observeListings(location: String, maxPrice: Double): Flow<List<ListingEntity>>
 
+    /** F07: vsi nezasedeni oglasi iz predpomnilnika, brez filtrov (seznam oglasov). */
+    @Query("SELECT * FROM listings WHERE isFilled = 0")
+    fun observeAll(): Flow<List<ListingEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(listings: List<ListingEntity>)
 
@@ -37,6 +41,27 @@ interface ListingDao {
     suspend fun syncListings(fresh: List<ListingEntity>, cutoff: Long) {
         upsertAll(fresh)
         deleteStale(cutoff)
+    }
+
+    @Query("DELETE FROM listings")
+    suspend fun deleteAll()
+
+    @Query("DELETE FROM listings WHERE id NOT IN (:ohranjeniIds)")
+    suspend fun deleteNotIn(ohranjeniIds: List<String>)
+
+    /**
+     * Polna sinhronizacija: pri poizvedbi brez filtrov je streznik merodajen za vse
+     * nezasedene oglase, zato zapise, ki jih ni vrnil, odstranimo takoj -- brisan
+     * oglas tako ne ostane v predpomnilniku do zastaranja.
+     */
+    @Transaction
+    suspend fun replaceAll(fresh: List<ListingEntity>) {
+        if (fresh.isEmpty()) {
+            deleteAll()
+        } else {
+            upsertAll(fresh)
+            deleteNotIn(fresh.map { it.id })
+        }
     }
 }
 

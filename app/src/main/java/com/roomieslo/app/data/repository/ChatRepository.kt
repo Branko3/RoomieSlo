@@ -12,9 +12,8 @@ import javax.inject.Singleton
 /**
  * F14: klepet med udelezencema ujemanja.
  *
- * Opomba: sporocila se berejo/posiljajo prek PostgREST (poizvedba na zahtevo).
- * Sprejem v realnem casu prek WebSocket z logiko ponovne vzpostavitve povezave
- * (napredna tehnika) v tej razlicici ni izveden.
+ * Posiljanje in zacetno branje potekata prek PostgREST, sprejem novih sporocil
+ * v realnem casu pa prek WebSocket -- znotraj ChatRealtimeService.
  */
 @Singleton
 class ChatRepository @Inject constructor(

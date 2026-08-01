@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.ProfileRepository
 import com.roomieslo.app.domain.model.LifestyleAnswer
 import com.roomieslo.app.ui.common.SampleData
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,7 +44,7 @@ class QuestionnaireViewModel @Inject constructor(
                 uiState.copy(isLoading = false, values = values)
             } catch (e: Exception) {
                 val values = questions.associate { (_, id) -> id to 0.5f }
-                uiState.copy(isLoading = false, values = values, errorMessage = e.message)
+                uiState.copy(isLoading = false, values = values, errorMessage = e.uporabnisko("Napaka pri nalaganju vprasalnika."))
             }
         }
     }
@@ -63,7 +64,7 @@ class QuestionnaireViewModel @Inject constructor(
                 profileRepository.saveMyAnswers(answers)
                 uiState.copy(isSaving = false, isSaved = true)
             } catch (e: Exception) {
-                uiState.copy(isSaving = false, errorMessage = e.message ?: "Shranjevanje ni uspelo.")
+                uiState.copy(isSaving = false, errorMessage = e.uporabnisko("Shranjevanje ni uspelo."))
             }
         }
     }

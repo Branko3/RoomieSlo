@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.FavoriteRepository
 import com.roomieslo.app.domain.model.Listing
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +34,7 @@ class FavoritesViewModel @Inject constructor(
             uiState = try {
                 uiState.copy(isLoading = false, favorites = favoriteRepository.getMyFavorites())
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Napaka pri nalaganju priljubljenih.")
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju priljubljenih."))
             }
         }
     }
@@ -44,7 +45,7 @@ class FavoritesViewModel @Inject constructor(
             try {
                 favoriteRepository.removeFavorite(listingId)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.message)
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Priljubljenega ni bilo mogoce odstraniti."))
             }
         }
     }

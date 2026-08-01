@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.AuthRepository
+import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,7 +47,9 @@ class AuthViewModel @Inject constructor(
                 block()
                 uiState.copy(isLoading = false, isSuccess = true)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.message ?: "Prislo je do napake.")
+                // Pri prijavi je izvirno sporocilo koristno ("Invalid login credentials"),
+                // zato ga obdrzimo; zamenjamo le napake omreznega sloja.
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko(e.message ?: "Prislo je do napake."))
             }
         }
     }
