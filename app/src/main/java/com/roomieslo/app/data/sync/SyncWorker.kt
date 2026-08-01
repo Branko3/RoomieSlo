@@ -30,7 +30,9 @@ class SyncWorker @AssistedInject constructor(
             listingRepository.syncAllFromRemote()
             matchRepository.syncFromRemote()
             Result.success()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Vzrok namerno zavrzemo: opravilo se ponovi ne glede na vrsto napake,
+            // WorkManager pa neuspeh zabelezi sam.
             Result.retry() // eksponentni odlog konfiguriran ob vlozitvi opravila
         }
     }

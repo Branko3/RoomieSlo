@@ -1,5 +1,6 @@
 package com.roomieslo.app.data.realtime
 
+import android.util.Log
 import com.roomieslo.app.data.remote.dto.MessageDto
 import com.roomieslo.app.domain.model.Message
 import io.github.jan.supabase.SupabaseClient
@@ -63,12 +64,16 @@ class ChatRealtimeService @Inject constructor(
                 val odlog = (OSNOVNI_ODLOG_MS shl minOf(poskus, NAJVECJI_POMIK))
                     .coerceAtMost(NAJVECJI_ODLOG_MS)
                 poskus++
+                // Vrsta napake na odlog ne vpliva, zabelezimo pa jo: brez tega se
+                // napacna nastavitev na strezniku kaze le kot klepet, ki molci.
+                Log.w(TAG, "Narocnina na $matchId ni uspela (poskus $poskus), ponovni poskus cez ${odlog}ms", e)
                 delay(odlog.milliseconds)
             }
         }
     }
 
     companion object {
+        private const val TAG = "ChatRealtime"
         private const val OSNOVNI_ODLOG_MS = 1_000L
         private const val NAJVECJI_ODLOG_MS = 30_000L
         private const val NAJVECJI_POMIK = 5

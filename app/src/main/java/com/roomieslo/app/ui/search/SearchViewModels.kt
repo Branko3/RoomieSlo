@@ -76,7 +76,9 @@ class SearchViewModel @Inject constructor(
             uiState = try {
                 listingRepository.syncFromRemote(loc.ifBlank { null }, if (brezMeje) null else max)
                 uiState.copy(isLoading = false)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+                // Vzrok namerno zavrzemo: predpomnilnik je ze prikazan, zato je
+                // za uporabnika pomembno le, da podatki niso sveži.
                 uiState.copy(
                     isLoading = false,
                     errorMessage = "Ni povezave -- prikazani so shranjeni podatki."
