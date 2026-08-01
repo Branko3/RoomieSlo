@@ -22,9 +22,8 @@ import javax.inject.Singleton
 /**
  * F14: klepet v realnem casu prek WebSocket (Supabase Realtime).
  *
- * Napredna tehnika: ponovna vzpostavitev povezave z eksponentnim odlogom.
- * Ob prekinjeni povezavi se poskus ponovi po 1, 2, 4, 8, 16 in nato 30 sekundah;
- * ob uspesni narocnini se stevec ponastavi.
+ * Ob prekinjeni povezavi se narocnina ponovi po 1, 2, 4, 8, 16 in nato 30 sekundah.
+ * Ob uspesni narocnini se stevec ponastavi.
  */
 @Singleton
 class ChatRealtimeService @Inject constructor(

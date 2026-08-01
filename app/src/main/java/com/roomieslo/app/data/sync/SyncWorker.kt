@@ -11,9 +11,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 /**
- * Zahtevnejsa funkcionalnost: asinhrona sinhronizacija z WorkManager.
- * Poganja se periodicno in ob dogodkih (npr. sprememba omreznega stanja), tudi ko
- * aplikacija ni v ospredju. Glej diplomsko delo, razdelek "Asinhrona sinhronizacija z WorkManager".
+ * Osvezi lokalni predpomnilnik v ozadju, tudi ko aplikacija ni v ospredju.
+ * Poganja se periodicno in ob vrnitvi omrezne povezave.
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(

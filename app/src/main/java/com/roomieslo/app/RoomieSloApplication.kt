@@ -31,7 +31,7 @@ class RoomieSloApplication : Application(), Configuration.Provider {
     }
 
     /**
-     * Zahtevnejsa funkcionalnost: periodicna sinhronizacija predpomnilnika v ozadju.
+     * Vlozi periodicno sinhronizacijo predpomnilnika (na 6 ur).
      *
      * Opravilo se izvede samo ob razpolozljivi povezavi; ob napaki SyncWorker vrne
      * Result.retry(), WorkManager pa poskus ponovi z eksponentnim odlogom.
