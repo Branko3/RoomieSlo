@@ -17,8 +17,9 @@ sealed interface AcceptMatchResult {
 /**
  * F15: zahteva za ujemanje (poslji / sprejmi / zavrni).
  *
- * Opomba: opticno zaklepanje nad poljem `version` (napredna tehnika) v tej razlicici
- * ni izvedeno — sprejem je preprosta posodobitev statusa.
+ * Sprejem in zavrnitev posodobita vrstico le, ce je ta se v stanju `pending`.
+ * Ce jo je medtem obdelal ze kdo drug, posodobitev ne zajame nobene vrstice
+ * in klic vrne Conflict.
  */
 @Singleton
 class MatchRepository @Inject constructor(
