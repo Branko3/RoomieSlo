@@ -8,6 +8,7 @@ import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.decodeRecord
 import io.github.jan.supabase.realtime.postgresChangeFlow
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -62,7 +63,7 @@ class ChatRealtimeService @Inject constructor(
                 val odlog = (OSNOVNI_ODLOG_MS shl minOf(poskus, NAJVECJI_POMIK))
                     .coerceAtMost(NAJVECJI_ODLOG_MS)
                 poskus++
-                delay(odlog)
+                delay(odlog.milliseconds)
             }
         }
     }
