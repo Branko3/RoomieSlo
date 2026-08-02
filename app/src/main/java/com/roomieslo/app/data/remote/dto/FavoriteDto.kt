@@ -9,6 +9,16 @@ data class FavoriteDto(
     @SerialName("listing_id") val listingId: String
 )
 
+/**
+ * Priljubljeni z vgnezdenim oglasom -- PostgREST vrne oboje v enem odgovoru.
+ * `listings` je lahko null, ce je bil oglas medtem izbrisan.
+ */
+@Serializable
+data class FavoriteWithListingDto(
+    @SerialName("listing_id") val listingId: String,
+    @SerialName("listings") val listing: ListingDto? = null
+)
+
 /** Vstavljanje priljubljenega (profile_id = trenutni uporabnik). */
 @Serializable
 data class NewFavoriteDto(

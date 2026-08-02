@@ -1,6 +1,7 @@
 package com.roomieslo.app.data.repository
 
 import com.roomieslo.app.data.remote.dto.ProfileDto
+import com.roomieslo.app.data.remote.dto.ProfileWithAnswersDto
 import com.roomieslo.app.data.remote.dto.QuestionnaireAnswerDto
 import com.roomieslo.app.domain.model.LifestyleAnswer
 import com.roomieslo.app.domain.model.Profile
@@ -20,10 +21,9 @@ class ProfileRepository @Inject constructor(
     /** F03: prebere profil trenutno prijavljenega uporabnika (z odgovori vprasalnika) prek PostgREST. */
     suspend fun getMyProfile(): Profile? {
         val uid = authRepository.currentUserId() ?: return null
-        val dto = supabase.from("profiles").select {
+        return supabase.from("profiles").select(PROFILE_WITH_ANSWERS) {
             filter { eq("id", uid) }
-        }.decodeSingleOrNull<ProfileDto>() ?: return null
-        return dto.toDomain(lifestyleAnswers = getAnswersFor(uid))
+        }.decodeSingleOrNull<ProfileWithAnswersDto>()?.toDomain()
     }
 
     /** F03/F19: posodobi prikazano ime trenutnega uporabnika. */
@@ -65,29 +65,18 @@ class ProfileRepository @Inject constructor(
 
     /**
      * F12-F13: vsi razpolozljivi profili (razen mojega) skupaj z odgovori vprasalnika,
-     * da lahko odjemalec izracuna zdruzljivost. Odgovori se pridobijo v eni poizvedbi in
-     * zdruzijo po profilu.
+     * da lahko odjemalec izracuna zdruzljivost.
+     *
+     * Odgovori so vgnezdeni v isto zahtevo, zato zadostuje en obhod do streznika.
      */
     suspend fun getRecommendationCandidates(): List<Profile> {
         val uid = authRepository.currentUserId()
-        val profiles = supabase.from("profiles").select {
+        return supabase.from("profiles").select(PROFILE_WITH_ANSWERS) {
             filter {
                 eq("is_available", true)
                 if (uid != null) neq("id", uid)
             }
-        }.decodeList<ProfileDto>()
-        if (profiles.isEmpty()) return emptyList()
-
-        val ids = profiles.map { it.id }
-        val answers = supabase.from("questionnaire_answers")
-            .select(Columns.list("profile_id", "question_id", "value", "weight")) {
-                filter { isIn("profile_id", ids) }
-            }.decodeList<QuestionnaireAnswerDto>()
-            .groupBy { it.profileId }
-
-        return profiles.map { p ->
-            p.toDomain(lifestyleAnswers = answers[p.id]?.map { it.toDomain() } ?: emptyList())
-        }
+        }.decodeList<ProfileWithAnswersDto>().map { it.toDomain() }
     }
 
     /** Prikazana imena za dani nabor id-jev (za seznam klepetov/ujemanj). */
@@ -108,5 +97,13 @@ class ProfileRepository @Inject constructor(
      */
     suspend fun syncFromRemote() {
         // Namenoma prazno.
+    }
+
+    companion object {
+        /** Profil z vgnezdenimi odgovori vprasalnika v enem obhodu. */
+        private val PROFILE_WITH_ANSWERS = Columns.raw(
+            "id, display_name, academic_status_verified, is_available, " +
+                "questionnaire_answers(profile_id, question_id, value, weight)"
+        )
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.domain.model.Profile
+import com.roomieslo.app.ui.common.NaloziObKoncu
 import com.roomieslo.app.ui.navigation.Destinations
 
 @Composable
@@ -87,7 +89,10 @@ fun SearchScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        val stanjeSeznama = rememberLazyListState()
+        NaloziObKoncu(stanjeSeznama) { viewModel.naloziNaslednjo() }
+
+        LazyColumn(state = stanjeSeznama, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(state.results, key = Listing::id) { listing ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -100,6 +105,13 @@ fun SearchScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
+                    }
+                }
+            }
+            if (state.nalagaNaslednjo) {
+                item {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
             }

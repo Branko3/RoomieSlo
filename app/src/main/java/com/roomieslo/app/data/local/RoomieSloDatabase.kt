@@ -11,7 +11,8 @@ import com.roomieslo.app.data.local.entity.ProfileEntity
 
 @Database(
     entities = [ProfileEntity::class, ListingEntity::class, MatchEntity::class],
-    version = 2,
+    // v3: ListingEntity je dobil createdAt in indeks (isFilled, createdAt).
+    version = 3,
     exportSchema = false
 )
 abstract class RoomieSloDatabase : RoomDatabase() {

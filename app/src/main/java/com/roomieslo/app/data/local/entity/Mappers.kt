@@ -8,7 +8,8 @@ fun ListingEntity.toDomain() = Listing(
     location = location,
     pricePerMonth = pricePerMonth,
     description = description,
-    isFilled = isFilled
+    isFilled = isFilled,
+    createdAt = createdAt
 )
 
 fun Listing.toEntity(syncedAt: Long = System.currentTimeMillis()) = ListingEntity(
@@ -18,6 +19,7 @@ fun Listing.toEntity(syncedAt: Long = System.currentTimeMillis()) = ListingEntit
     pricePerMonth = pricePerMonth,
     description = description,
     isFilled = isFilled,
+    createdAt = createdAt,
     lastSyncedAt = syncedAt
 )
 

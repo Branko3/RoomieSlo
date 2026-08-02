@@ -48,7 +48,13 @@ class AdminViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 adminRepository.setReportStatus(report.id, newStatus)
-                load()
+                // Spremenila se je ena vrstica, zato posodobimo samo njo -- ponovno
+                // branje celotnega seznama prijav tu ni potrebno.
+                uiState = uiState.copy(
+                    reports = uiState.reports.map {
+                        if (it.id == report.id) it.copy(status = newStatus) else it
+                    }
+                )
             } catch (e: Exception) {
                 uiState = uiState.copy(errorMessage = e.uporabnisko("Statusa prijave ni bilo mogoce spremeniti."))
             }

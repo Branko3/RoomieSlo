@@ -12,7 +12,8 @@ data class ListingDto(
     val location: String,
     @SerialName("price_per_month") val pricePerMonth: Double,
     val description: String = "",
-    @SerialName("is_filled") val isFilled: Boolean = false
+    @SerialName("is_filled") val isFilled: Boolean = false,
+    @SerialName("created_at") val createdAt: String = ""
 ) {
     fun toDomain() = Listing(
         id = id,
@@ -20,7 +21,8 @@ data class ListingDto(
         location = location,
         pricePerMonth = pricePerMonth,
         description = description,
-        isFilled = isFilled
+        isFilled = isFilled,
+        createdAt = createdAt
     )
 }
 

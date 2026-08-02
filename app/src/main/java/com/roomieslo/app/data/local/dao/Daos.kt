@@ -21,18 +21,45 @@ interface ProfileDao {
 
 @Dao
 interface ListingDao {
-    // F10: indeksirana poizvedba po lokaciji in ceni
-    @Query("SELECT * FROM listings WHERE isFilled = 0 AND location LIKE '%' || :location || '%' AND pricePerMonth <= :maxPrice")
-    fun observeListings(location: String, maxPrice: Double): Flow<List<ListingEntity>>
+    /**
+     * F10: iskanje po lokaciji in ceni.
+     *
+     * Mejo `limit` doloca zaslon: ko uporabnik pride do konca seznama, jo poveca in
+     * Room sam odda sirsi nabor. Tako se ob vsakem branju ne prenese cel predpomnilnik.
+     * Pogoja `isFilled` in `pricePerMonth` pokriva indeks (isFilled, pricePerMonth),
+     * razvrscanje pa indeks (isFilled, createdAt).
+     *
+     * Vodilni `%` pri LIKE prepreci uporabo indeksa, zato SQLite lokacije pregleda
+     * zaporedno. To je zavestna odlocitev: `limit` pregled omeji na eno stran,
+     * polnotekstovno iskanje (@Fts4) pa bi ujemalo po besedah in predponah namesto
+     * po poljubnem podnizu -- "ubljan" ne bi vec naslo "Ljubljana".
+     */
+    @Query(
+        """
+        SELECT * FROM listings
+        WHERE isFilled = 0
+          AND location LIKE '%' || :location || '%'
+          AND pricePerMonth <= :maxPrice
+        ORDER BY createdAt DESC
+        LIMIT :limit
+        """
+    )
+    fun observeListings(location: String, maxPrice: Double, limit: Int): Flow<List<ListingEntity>>
 
-    /** F07: vsi nezasedeni oglasi iz predpomnilnika, brez filtrov (seznam oglasov). */
-    @Query("SELECT * FROM listings WHERE isFilled = 0")
-    fun observeAll(): Flow<List<ListingEntity>>
+    /** F07: nezasedeni oglasi brez filtrov, po straneh (seznam oglasov). */
+    @Query("SELECT * FROM listings WHERE isFilled = 0 ORDER BY createdAt DESC LIMIT :limit")
+    fun observeAll(limit: Int): Flow<List<ListingEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(listings: List<ListingEntity>)
 
-    /** Odstrani zapise, ki jih streznik ze dolgo ni vec vrnil (izbrisani ali zasedeni oglasi). */
+    /**
+     * Odstrani zapise, starejse od dane meje.
+     *
+     * Uporablja se na dva nacina: z mejo "zdaj minus 7 dni" za zastarele zapise, in z
+     * oznako obhoda po straneh -- takrat imajo vsi zapisi tega obhoda enak lastSyncedAt,
+     * zato ta klic pobrise natanko tiste, ki jih streznik v obhodu ni vec vrnil.
+     */
     @Query("DELETE FROM listings WHERE lastSyncedAt < :cutoff")
     suspend fun deleteStale(cutoff: Long)
 

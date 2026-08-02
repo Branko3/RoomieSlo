@@ -160,8 +160,12 @@ class ChatViewModel @Inject constructor(
         uiState = uiState.copy(draft = "")
         viewModelScope.launch {
             try {
-                chatRepository.sendMessage(id, body)
-                load()
+                // Streznik vrne vstavljeno sporocilo, zato ga dodamo naravnost v seznam
+                // in nam ni treba znova prenesti celotnega klepeta.
+                val poslano = chatRepository.sendMessage(id, body)
+                if (poslano != null && uiState.messages.none { it.id == poslano.id }) {
+                    uiState = uiState.copy(messages = uiState.messages + poslano)
+                }
             } catch (e: Exception) {
                 uiState = uiState.copy(errorMessage = e.uporabnisko("Sporocila ni bilo mogoce poslati."))
             }

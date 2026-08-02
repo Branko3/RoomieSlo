@@ -1,7 +1,7 @@
 package com.roomieslo.app.data.repository
 
 import com.roomieslo.app.data.remote.dto.FavoriteDto
-import com.roomieslo.app.data.remote.dto.ListingDto
+import com.roomieslo.app.data.remote.dto.FavoriteWithListingDto
 import com.roomieslo.app.data.remote.dto.NewFavoriteDto
 import com.roomieslo.app.domain.model.Listing
 import io.github.jan.supabase.SupabaseClient
@@ -42,15 +42,22 @@ class FavoriteRepository @Inject constructor(
         }.decodeList<FavoriteDto>().isNotEmpty()
     }
 
-    /** F17: priljubljeni oglasi trenutnega uporabnika. */
+    /**
+     * F17: priljubljeni oglasi trenutnega uporabnika.
+     *
+     * Oglas je vgnezden v isto zahtevo (PostgREST zdruzi tabeli prek tujega kljuca
+     * favorites.listing_id -> listings.id), zato zadostuje en obhod namesto dveh.
+     */
     suspend fun getMyFavorites(): List<Listing> {
         val uid = authRepository.currentUserId() ?: return emptyList()
-        val ids = supabase.from("favorites").select(Columns.list("listing_id")) {
+        return supabase.from("favorites").select(FAVORITE_WITH_LISTING) {
             filter { eq("profile_id", uid) }
-        }.decodeList<FavoriteDto>().map { it.listingId }
-        if (ids.isEmpty()) return emptyList()
-        return supabase.from("listings").select {
-            filter { isIn("id", ids) }
-        }.decodeList<ListingDto>().map { it.toDomain() }
+        }.decodeList<FavoriteWithListingDto>().mapNotNull { it.listing?.toDomain() }
+    }
+
+    companion object {
+        private val FAVORITE_WITH_LISTING = Columns.raw(
+            "listing_id, listings(id, owner_id, location, price_per_month, description, is_filled, created_at)"
+        )
     }
 }

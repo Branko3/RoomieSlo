@@ -12,7 +12,9 @@ import com.roomieslo.app.data.repository.MatchRepository
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,7 +23,11 @@ import javax.inject.Inject
 data class ListingListUiState(
     val isLoading: Boolean = true,
     val listings: List<Listing> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    /** Ali se prenasa naslednja stran (za vrtiljak na dnu seznama). */
+    val nalagaNaslednjo: Boolean = false,
+    /** Nabor je izcrpan -- drsenje naj ne sprozi novih zahtev. */
+    val jeKonec: Boolean = false
 )
 
 @HiltViewModel
@@ -32,30 +38,43 @@ class ListingListViewModel @Inject constructor(
     var uiState by mutableStateOf(ListingListUiState())
         private set
 
-    private var observeJob: Job? = null
+    /** Koliko oglasov trenutno beremo iz predpomnilnika; raste ob drsenju do dna. */
+    private val meja = MutableStateFlow(ListingRepository.VELIKOST_STRANI)
+
+    /** Oznaka trenutnega obhoda po straneh -- glej ListingRepository.syncAllPage(). */
+    private var oznaka = 0L
 
     init { opazujPredpomnilnik() }
 
     /**
-     * Predpomnilnik opazujemo enkrat ob nastanku; Room sam odda nove podatke
-     * po vsaki sinhronizaciji, zato seznama ni treba nastavljati rocno.
+     * Predpomnilnik opazujemo enkrat ob nastanku; Room sam odda nove podatke po vsaki
+     * sinhronizaciji in ob vsaki spremembi meje, zato seznama ni treba nastavljati rocno.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun opazujPredpomnilnik() {
-        observeJob?.cancel()
-        observeJob = viewModelScope.launch {
-            listingRepository.observeAllListings().collect { cached ->
-                uiState = uiState.copy(isLoading = false, listings = cached)
-            }
+        viewModelScope.launch {
+            meja.flatMapLatest { listingRepository.observeAllListings(it) }
+                .collect { cached -> uiState = uiState.copy(isLoading = false, listings = cached) }
         }
     }
 
-    /** Osvezi s streznika. Ob napaki ostanejo prikazani predpomnjeni oglasi. */
+    /**
+     * Osvezi s streznika. Ob napaki ostanejo prikazani predpomnjeni oglasi.
+     *
+     * Osvezi natanko toliko oglasov, kolikor jih zaslon trenutno prikazuje, in to v eni
+     * zahtevi -- meje ne zmanjsamo, sicer bi seznam ob vrnitvi s podrobnosti skocil na vrh.
+     */
     fun load() {
         uiState = uiState.copy(errorMessage = null)
         viewModelScope.launch {
             uiState = try {
-                listingRepository.syncAllFromRemote()
-                uiState.copy(isLoading = false)
+                oznaka = System.currentTimeMillis()
+                val stran = listingRepository.syncAllPage(
+                    createdBefore = null,
+                    limit = meja.value,
+                    oznaka = oznaka
+                )
+                uiState.copy(isLoading = false, jeKonec = stran.jeKonec)
             } catch (e: Exception) {
                 uiState.copy(
                     isLoading = false,
@@ -66,6 +85,34 @@ class ListingListViewModel @Inject constructor(
                         "Ni povezave -- prikazani so shranjeni podatki."
                     }
                 )
+            }
+        }
+    }
+
+    /**
+     * Prenese naslednjo stran; klice jo zaslon, ko uporabnik pride do dna seznama.
+     *
+     * Kazalec vzamemo iz zadnjega prikazanega oglasa in ne iz odgovora streznika:
+     * tako strancenje deluje tudi brez povezave, ko je predpomnilnik edini vir.
+     * Iz istega razloga mejo razsirimo takoj, se pred zahtevo na streznik.
+     */
+    fun naloziNaslednjo() {
+        if (uiState.nalagaNaslednjo || uiState.jeKonec) return
+        val kazalec = uiState.listings.lastOrNull()?.createdAt ?: return
+        uiState = uiState.copy(nalagaNaslednjo = true)
+        meja.value += ListingRepository.VELIKOST_STRANI
+        viewModelScope.launch {
+            uiState = try {
+                val stran = listingRepository.syncAllPage(
+                    createdBefore = kazalec,
+                    limit = ListingRepository.VELIKOST_STRANI,
+                    oznaka = oznaka
+                )
+                uiState.copy(nalagaNaslednjo = false, jeKonec = stran.jeKonec)
+            } catch (_: Exception) {
+                // Brez povezave ostane razsirjena meja nad predpomnilnikom; konca nabora
+                // ne moremo potrditi, zato jeKonec pustimo pri miru.
+                uiState.copy(nalagaNaslednjo = false)
             }
         }
     }

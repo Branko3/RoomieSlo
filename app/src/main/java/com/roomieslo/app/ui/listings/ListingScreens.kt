@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -53,6 +54,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
+import com.roomieslo.app.ui.common.NaloziObKoncu
 
 @Composable
 fun ListingListScreen(
@@ -95,13 +97,37 @@ fun ListingListScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(state.listings, key = Listing::id) { listing ->
-                        ListingCard(listing = listing, onClick = { navController.navigate("listing_detail/${listing.id}") })
+                else -> {
+                    val stanjeSeznama = rememberLazyListState()
+                    NaloziObKoncu(stanjeSeznama) { viewModel.naloziNaslednjo() }
+
+                    // Napaka ob polnem predpomnilniku ni usodna, a mora biti vidna --
+                    // sicer uporabnik ne ve, da gleda shranjene podatke.
+                    state.errorMessage?.let { sporocilo ->
+                        Text(
+                            sporocilo,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                        )
+                    }
+
+                    LazyColumn(
+                        state = stanjeSeznama,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(state.listings, key = Listing::id) { listing ->
+                            ListingCard(listing = listing, onClick = { navController.navigate("listing_detail/${listing.id}") })
+                        }
+                        if (state.nalagaNaslednjo) {
+                            item {
+                                Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
                     }
                 }
             }

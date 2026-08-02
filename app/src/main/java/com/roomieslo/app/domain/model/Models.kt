@@ -23,7 +23,12 @@ data class Listing(
     val location: String,
     val pricePerMonth: Double,
     val description: String,
-    val isFilled: Boolean // F09
+    val isFilled: Boolean, // F09
+    /**
+     * Cas nastanka v zapisu ISO 8601, kot ga vrne baza (npr. 2026-07-20T10:00:00Z).
+     * Oglasi so razvrsceni po tem polju, hkrati pa sluzi kot kazalec pri strancenju.
+     */
+    val createdAt: String
 )
 
 /** F15 */

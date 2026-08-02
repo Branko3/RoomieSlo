@@ -15,7 +15,11 @@ data class ProfileEntity(
 
 @Entity(
     tableName = "listings",
-    indices = [Index(value = ["isFilled", "pricePerMonth"])]
+    indices = [
+        Index(value = ["isFilled", "pricePerMonth"]),
+        // Seznam oglasov bere po vrstnem redu nastanka in po straneh.
+        Index(value = ["isFilled", "createdAt"])
+    ]
 )
 data class ListingEntity(
     @PrimaryKey val id: String,
@@ -24,6 +28,8 @@ data class ListingEntity(
     val pricePerMonth: Double,
     val description: String,
     val isFilled: Boolean,
+    /** ISO 8601, enako kot na strezniku -- niz se v tem zapisu pravilno primerja tudi leksikografsko. */
+    val createdAt: String,
     val lastSyncedAt: Long
 )
 

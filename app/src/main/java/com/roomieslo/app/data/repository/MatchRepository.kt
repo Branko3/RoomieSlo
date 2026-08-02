@@ -5,6 +5,7 @@ import com.roomieslo.app.data.remote.dto.NewMatchDto
 import com.roomieslo.app.domain.model.Match
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +37,7 @@ class MatchRepository @Inject constructor(
     /** Vsa ujemanja, v katerih sodeluje trenutni uporabnik. */
     suspend fun getMyMatches(): List<Match> {
         val uid = authRepository.currentUserId() ?: return emptyList()
-        return supabase.from("matches").select {
+        return supabase.from("matches").select(MATCH_COLUMNS) {
             filter {
                 or {
                     eq("user_id_a", uid)
@@ -53,7 +54,7 @@ class MatchRepository @Inject constructor(
                eq("id", matchId)
                eq("status", "pending")
            }
-           select()
+           select(MATCH_COLUMNS)
        }.decodeList<MatchDto>()
 
         return if (updated.isEmpty()) AcceptMatchResult.Conflict else AcceptMatchResult.Success
@@ -82,5 +83,9 @@ class MatchRepository @Inject constructor(
      */
     suspend fun syncFromRemote() {
         // Namenoma prazno.
+    }
+
+    companion object {
+        private val MATCH_COLUMNS = Columns.list("id", "user_id_a", "user_id_b", "status", "version")
     }
 }
