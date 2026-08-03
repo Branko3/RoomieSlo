@@ -11,23 +11,17 @@ import com.roomieslo.app.domain.model.Profile
 /** Vzorcni podatki za predogled zaslonov (Compose Preview) in vizualni razvoj vmesnika. */
 object SampleData {
 
-    val lifestyleQuestions = listOf(
-        "Jutranji ali nocni tip?" to "q_wake",
-        "Pogostost gostov v stanovanju" to "q_guests",
-        "Odnos do cistoce skupnih prostorov" to "q_cleanliness",
-        "Kajenje v stanovanju" to "q_smoking",
-        "Glasnost (glasba, klici)" to "q_noise"
-    )
-
     val profile = Profile(
         userId = "u1",
         displayName = "Amar H.",
         academicStatusVerified = true,
         isAvailable = true,
         lifestyleAnswers = listOf(
-            LifestyleAnswer("q_wake", 0.3f, 1f),
-            LifestyleAnswer("q_guests", 0.5f, 0.7f),
-            LifestyleAnswer("q_cleanliness", 0.8f, 1f)
+            LifestyleAnswer("q_wake", 0.25f, 1f),
+            LifestyleAnswer("q_guests", 0.5f, 1f),
+            LifestyleAnswer("q_cleanliness", 0.75f, 1f),
+            // Utez 0: uporabnik na to trditev ni zelel odgovoriti.
+            LifestyleAnswer("q_smoking", 0.5f, 0f)
         )
     )
 

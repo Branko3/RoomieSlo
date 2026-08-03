@@ -18,12 +18,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
@@ -35,6 +39,17 @@ fun FavoritesScreen(
 ) {
     val state = viewModel.uiState
 
+    // Osvezi ob vsakem vstopu na zaslon: oglas se lahko med tem oznaci kot priljubljen
+    // na zaslonu s podrobnostmi, ta pogled pa bi sicer ostal pri starem naboru.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.load()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             "Priljubljeni oglasi",
@@ -43,9 +58,11 @@ fun FavoritesScreen(
             modifier = Modifier.padding(24.dp)
         )
         when {
-            state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            // Vrtavka samo pri prvem nalaganju; ob osvezitvi ostane prikazan obstojeci seznam.
+            state.isLoading && state.favorites.isEmpty() -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) { CircularProgressIndicator() }
             state.favorites.isEmpty() -> Text(
                 state.errorMessage ?: "Nimas se shranjenih oglasov.",
                 style = MaterialTheme.typography.bodyMedium,
