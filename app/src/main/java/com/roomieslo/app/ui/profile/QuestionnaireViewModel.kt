@@ -84,7 +84,11 @@ class QuestionnaireViewModel @Inject constructor(
             uiState = try {
                 val odgovori = trditve.map { trditev ->
                     val izbran = uiState.odgovori[trditev.id] ?: LikertOdgovor.NE_ZELIM_ODGOVORITI
-                    LifestyleAnswer(questionId = trditev.id, value = izbran.vrednost, weight = izbran.utez)
+                    LifestyleAnswer(
+                        questionId = trditev.id,
+                        value = izbran.vrednost,
+                        weight = trditev.utez * izbran.mnozitelj
+                    )
                 }
                 profileRepository.saveMyAnswers(odgovori)
                 uiState.copy(isSaving = false, isSaved = true)

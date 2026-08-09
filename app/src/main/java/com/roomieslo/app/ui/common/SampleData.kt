@@ -16,10 +16,14 @@ object SampleData {
         displayName = "Amar H.",
         academicStatusVerified = true,
         isAvailable = true,
+        // Utezi ustrezajo tistim iz Vprasalnik.trditve; predogled tako kaze mogoce stanje.
         lifestyleAnswers = listOf(
-            LifestyleAnswer("q_wake", 0.25f, 1f),
-            LifestyleAnswer("q_guests", 0.5f, 1f),
-            LifestyleAnswer("q_cleanliness", 0.75f, 1f),
+            LifestyleAnswer("q_cleanliness", 0.75f, 0.1099f),
+            LifestyleAnswer("q_costs", 1f, 0.1056f),
+            LifestyleAnswer("q_chores", 0.75f, 0.0992f),
+            LifestyleAnswer("q_noise", 0.5f, 0.0904f),
+            LifestyleAnswer("q_guests", 0.5f, 0.0820f),
+            LifestyleAnswer("q_wake", 0.25f, 0.0675f),
             // Utez 0: uporabnik na to trditev ni zelel odgovoriti.
             LifestyleAnswer("q_smoking", 0.5f, 0f)
         )

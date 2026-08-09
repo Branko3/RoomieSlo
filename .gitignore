@@ -9,3 +9,6 @@
 .cxx
 local.properties
 build/
+
+# Osebne delovne opombe, niso del izvorne kode
+TODO.md
