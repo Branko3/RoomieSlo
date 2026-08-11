@@ -64,7 +64,7 @@ fun FavoritesScreen(
                 contentAlignment = Alignment.Center
             ) { CircularProgressIndicator() }
             state.favorites.isEmpty() -> Text(
-                state.errorMessage ?: "Nimas se shranjenih oglasov.",
+                state.errorMessage ?: "Nimaš še shranjenih oglasov.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)

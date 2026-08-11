@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import com.roomieslo.app.domain.model.DeliveryStatus
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,7 +56,7 @@ fun ChatListScreen(
                 CircularProgressIndicator()
             }
             state.rows.isEmpty() -> Text(
-                state.errorMessage ?: "Nimas se ujemanj. Poslji zahtevo iz oglasa.",
+                state.errorMessage ?: "Nimaš še ujemanj. Pošlji zahtevo iz oglasa.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -79,7 +80,7 @@ fun ChatListScreen(
                             Text(
                                 when (row.match.status) {
                                     MatchStatus.ACCEPTED -> "Sprejeto — odpri klepet"
-                                    MatchStatus.PENDING -> if (row.iAmRecipient) "Nova zahteva za ujemanje" else "caka na odgovor"
+                                    MatchStatus.PENDING -> if (row.iAmRecipient) "Nova zahteva za ujemanje" else "Čaka na odgovor"
                                     MatchStatus.REJECTED -> "Zavrnjeno"
                                 },
                                 style = MaterialTheme.typography.bodySmall,
@@ -124,9 +125,9 @@ fun ChatScreen(
             item { Spacer(Modifier.height(8.dp)) }
             items(state.messages, key = { it.id }) { message ->
                 val isOwn = message.senderId == state.myUserId
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = if (isOwn) Arrangement.End else Arrangement.Start
+                    horizontalAlignment = if (isOwn) Alignment.End else Alignment.Start
                 ) {
                     Surface(
                         color = if (isOwn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
@@ -137,6 +138,15 @@ fun ChatScreen(
                             message.body,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                             color = if (isOwn) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    // Stanje dostave zanima le posiljatelja, zato ga prikazemo samo pri svojih sporocilih.
+                    if (isOwn) {
+                        Text(
+                            besediloStanja(message.deliveryStatus),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 2.dp, end = 4.dp)
                         )
                     }
                 }
@@ -151,14 +161,21 @@ fun ChatScreen(
             OutlinedTextField(
                 value = state.draft,
                 onValueChange = viewModel::onDraftChange,
-                placeholder = { Text("Napisi sporocilo...") },
+                placeholder = { Text("Napiši sporočilo...") },
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = { viewModel.send() }) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Poslji")
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Pošlji")
             }
         }
     }
+}
+
+/** Besedilo stanja dostave, kot ga vidi posiljatelj. */
+private fun besediloStanja(stanje: DeliveryStatus): String = when (stanje) {
+    DeliveryStatus.SENT -> "Poslano"
+    DeliveryStatus.DELIVERED -> "Dostavljeno"
+    DeliveryStatus.READ -> "Prebrano"
 }
 
 @Preview(showBackground = true)

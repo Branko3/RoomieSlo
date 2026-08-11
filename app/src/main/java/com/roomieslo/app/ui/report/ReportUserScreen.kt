@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
-private val reasons = listOf("Neprimerna vsebina", "Lazen profil ali oglas", "Nadlegovanje", "Drugo")
+private val reasons = listOf("Neprimerna vsebina", "Lažen profil ali oglas", "Nadlegovanje", "Drugo")
 
 @Composable
 fun ReportUserScreen(
@@ -73,7 +73,7 @@ fun ReportUserScreen(
             onClick = { viewModel.submit() },
             enabled = !state.isSubmitting,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (state.isSubmitting) "Posiljam..." else "Poslji prijavo") }
+        ) { Text(if (state.isSubmitting) "Pošiljam..." else "Pošlji prijavo") }
     }
 }
 

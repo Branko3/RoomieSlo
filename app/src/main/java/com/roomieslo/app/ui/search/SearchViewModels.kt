@@ -177,7 +177,7 @@ class RecommendedProfilesViewModel @Inject constructor(
                 }.sortedByDescending { it.second }
                 uiState.copy(isLoading = false, results = scored)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju priporocil."))
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju priporočil."))
             }
         }
     }

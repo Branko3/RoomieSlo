@@ -177,7 +177,7 @@ class ListingDetailViewModel @Inject constructor(
                 if (newValue) favoriteRepository.addFavorite(listing.id)
                 else favoriteRepository.removeFavorite(listing.id)
             } catch (e: Exception) {
-                uiState = uiState.copy(isFavorite = !newValue, errorMessage = e.uporabnisko("Priljubljenih ni bilo mogoce posodobiti."))
+                uiState = uiState.copy(isFavorite = !newValue, errorMessage = e.uporabnisko("Priljubljenih ni bilo mogoče posodobiti."))
             }
         }
     }
@@ -190,7 +190,7 @@ class ListingDetailViewModel @Inject constructor(
             try {
                 listingRepository.markFilled(listing.id, newValue)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Stanja oglasa ni bilo mogoce spremeniti."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Stanja oglasa ni bilo mogoče spremeniti."))
             }
         }
     }
@@ -202,7 +202,7 @@ class ListingDetailViewModel @Inject constructor(
                 listingRepository.deleteListing(listing.id)
                 uiState = uiState.copy(isDeleted = true)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Oglasa ni bilo mogoce izbrisati."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Oglasa ni bilo mogoče izbrisati."))
             }
         }
     }
@@ -216,7 +216,7 @@ class ListingDetailViewModel @Inject constructor(
             try {
                 matchRepository.sendRequest(listing.ownerId)
             } catch (e: Exception) {
-                uiState = uiState.copy(isRequestSent = false, errorMessage = e.uporabnisko("Zahteve ni bilo mogoce poslati."))
+                uiState = uiState.copy(isRequestSent = false, errorMessage = e.uporabnisko("Zahteve ni bilo mogoče poslati."))
             }
         }
     }

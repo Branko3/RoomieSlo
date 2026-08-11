@@ -44,6 +44,44 @@ class ChatRepository @Inject constructor(
         }.decodeSingleOrNull<MessageDto>()?.toDomain()
     }
 
+    /**
+     * F14: oznaci sporocila sogovornika kot dostavljena.
+     *
+     * Klicemo ob odprtju seznama klepetov: uporabnik je aplikacijo odprl, torej so
+     * sporocila prispela do njegove naprave, ceprav posameznega klepeta se ni odprl.
+     * Posodobimo samo vrstice v stanju `sent`, da ze prebranih ne vrnemo nazaj.
+     *
+     * Posodabljamo izkljucno tuja sporocila -- stanje svojega sporocila postavi
+     * prejemnik, ne posiljatelj.
+     */
+    suspend fun markDelivered(matchId: String) {
+        val uid = authRepository.currentUserId() ?: return
+        supabase.from("messages").update({ set("delivery_status", "delivered") }) {
+            filter {
+                eq("match_id", matchId)
+                neq("sender_id", uid)
+                eq("delivery_status", "sent")
+            }
+        }
+    }
+
+    /**
+     * F14: oznaci sporocila sogovornika kot prebrana.
+     *
+     * Klicemo ob odprtju klepeta. Zajamemo vse, kar se ni prebrano -- tudi vrstice
+     * v stanju `sent`, saj je sporocilo, ki ga uporabnik vidi, ocitno tudi prispelo.
+     */
+    suspend fun markRead(matchId: String) {
+        val uid = authRepository.currentUserId() ?: return
+        supabase.from("messages").update({ set("delivery_status", "read") }) {
+            filter {
+                eq("match_id", matchId)
+                neq("sender_id", uid)
+                neq("delivery_status", "read")
+            }
+        }
+    }
+
     fun currentUserId(): String? = authRepository.currentUserId()
 
     companion object {

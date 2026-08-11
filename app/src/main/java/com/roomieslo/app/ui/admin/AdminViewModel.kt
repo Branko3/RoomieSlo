@@ -56,7 +56,7 @@ class AdminViewModel @Inject constructor(
                     }
                 )
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Statusa prijave ni bilo mogoce spremeniti."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Statusa prijave ni bilo mogoče spremeniti."))
             }
         }
     }

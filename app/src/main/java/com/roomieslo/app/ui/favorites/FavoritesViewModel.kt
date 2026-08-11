@@ -45,7 +45,7 @@ class FavoritesViewModel @Inject constructor(
             try {
                 favoriteRepository.removeFavorite(listingId)
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Priljubljenega ni bilo mogoce odstraniti."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Priljubljenega ni bilo mogoče odstraniti."))
             }
         }
     }

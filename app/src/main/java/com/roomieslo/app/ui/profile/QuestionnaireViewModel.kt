@@ -58,7 +58,7 @@ class QuestionnaireViewModel @Inject constructor(
                 }.toMap()
                 uiState.copy(isLoading = false, odgovori = odgovori)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju vprasalnika."))
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju vprašalnika."))
             }
         }
     }

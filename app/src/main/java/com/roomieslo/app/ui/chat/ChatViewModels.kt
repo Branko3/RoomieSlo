@@ -36,7 +36,8 @@ data class ChatListUiState(
 @HiltViewModel
 class ChatListViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     var uiState by mutableStateOf(ChatListUiState())
@@ -60,6 +61,11 @@ class ChatListViewModel @Inject constructor(
                         iAmRecipient = m.userIdB == uid && m.status == MatchStatus.PENDING
                     )
                 }
+                // Uporabnik je odprl aplikacijo, zato so tuja sporocila prispela do naprave.
+                // Neuspeh te posodobitve ne sme podreti seznama, zato napako pozremo.
+                rows.filter { it.match.status == MatchStatus.ACCEPTED }.forEach { vrstica ->
+                    runCatching { chatRepository.markDelivered(vrstica.match.id) }
+                }
                 uiState.copy(isLoading = false, rows = rows)
             } catch (e: Exception) {
                 uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju ujemanj."))
@@ -77,7 +83,7 @@ class ChatListViewModel @Inject constructor(
                     uiState = uiState.copy(errorMessage = "Ta zahteva je bila ze obravnavana.")
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoce sprejeti."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoče sprejeti."))
             }
         }
     }
@@ -88,7 +94,7 @@ class ChatListViewModel @Inject constructor(
                 matchRepository.rejectMatch(matchId)
                 load()
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoce zavrniti."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Zahteve ni bilo mogoče zavrniti."))
             }
         }
     }
@@ -132,6 +138,8 @@ class ChatViewModel @Inject constructor(
                 // Isto sporocilo lahko pride tudi prek load(), zato podvojitve zavrzemo.
                 if (uiState.messages.none { it.id == novo.id }) {
                     uiState = uiState.copy(messages = uiState.messages + novo)
+                    // Klepet je odprt, zato je prispelo tuje sporocilo tudi ze prebrano.
+                    if (novo.senderId != uiState.myUserId) oznaciPrebrana(id)
                 }
             }
         }
@@ -144,11 +152,25 @@ class ChatViewModel @Inject constructor(
         }
         viewModelScope.launch {
             uiState = try {
-                uiState.copy(isLoading = false, messages = chatRepository.getMessages(id))
+                val sporocila = chatRepository.getMessages(id)
+                // Klepet je odprt, torej so tuja sporocila prebrana.
+                oznaciPrebrana(id)
+                uiState.copy(isLoading = false, messages = sporocila)
             } catch (e: Exception) {
-                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju sporocil."))
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju sporočil."))
             }
         }
+    }
+
+    /**
+     * Stanje dostave posodobimo v locenem opravilu in napako pozremo: klepet mora
+     * delovati tudi, ce posodobitev ne uspe, saj gre le za oznako stanja.
+     *
+     * Stanje svojih sporocil se osvezi ob naslednjem branju klepeta -- naročnina
+     * v realnem casu zajema le vstavljanje, ne posodobitev vrstic.
+     */
+    private fun oznaciPrebrana(idUjemanja: String) {
+        viewModelScope.launch { runCatching { chatRepository.markRead(idUjemanja) } }
     }
 
     fun onDraftChange(v: String) { uiState = uiState.copy(draft = v) }
@@ -167,7 +189,7 @@ class ChatViewModel @Inject constructor(
                     uiState = uiState.copy(messages = uiState.messages + poslano)
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(errorMessage = e.uporabnisko("Sporocila ni bilo mogoce poslati."))
+                uiState = uiState.copy(errorMessage = e.uporabnisko("Sporočila ni bilo mogoče poslati."))
             }
         }
     }

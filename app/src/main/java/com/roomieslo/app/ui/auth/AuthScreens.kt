@@ -79,7 +79,7 @@ private fun LoginContent(
     ) {
         Text("RoomieSlo", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(
-            "Poisci sostanovalca, ki mu res ustrezas",
+            "Poišči sostanovalca, ki mu res ustrezaš",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -125,7 +125,7 @@ private fun LoginContent(
             onClick = onRegisterClick,
             enabled = !isLoading,
             modifier = Modifier.fillMaxWidth()
-        ) { Text("se nimas racuna? Registriraj se") }
+        ) { Text("Še nimaš računa? Registriraj se") }
     }
 }
 
@@ -169,7 +169,7 @@ private fun RegisterContent(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        Text("Ustvari racun", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text("Ustvari račun", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(24.dp))
         OutlinedTextField(
             value = name,
@@ -242,7 +242,7 @@ fun AcademicVerificationScreen(
         Text("Preverjanje akademskega statusa", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         Text(
-            "Nalozi potrdilo o vpisu (vpisnico), da drugi uporabniki vidijo, da si preverjen tuji student. To omogoca preverjanje statusa tudi pred uradnim zacetkom semestra.",
+            "Naloži potrdilo o vpisu (vpisnico), da drugi uporabniki vidijo, da si preverjen tuji študent. To omogoča preverjanje statusa tudi pred uradnim začetkom semestra.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -262,7 +262,7 @@ fun AcademicVerificationScreen(
                 Text(
                     when {
                         state.isUploading -> "Nalagam..."
-                        state.isUploaded -> "Nalozeno: ${state.fileName ?: "vpisnica"} ✓"
+                        state.isUploaded -> "Naloženo: ${state.fileName ?: "vpisnica"} ✓"
                         state.fileName != null -> state.fileName
                         else -> "Ni izbrane datoteke"
                     }
@@ -282,9 +282,9 @@ fun AcademicVerificationScreen(
         Button(
             onClick = { navController.navigate(Destinations.LIFESTYLE_QUESTIONNAIRE) },
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (state.isUploaded) "Nadaljuj" else "Poslji v preverjanje") }
+        ) { Text(if (state.isUploaded) "Nadaljuj" else "Pošlji v preverjanje") }
         TextButton(onClick = { navController.navigate(Destinations.LIFESTYLE_QUESTIONNAIRE) }) {
-            Text("Preskoci za zdaj")
+            Text("Preskoči za zdaj")
         }
     }
 }

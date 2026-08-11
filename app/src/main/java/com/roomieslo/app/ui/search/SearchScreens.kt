@@ -60,7 +60,7 @@ fun SearchScreen(
         Spacer(Modifier.height(20.dp))
         val zgornjaMeja = if (state.maxPrice >= SearchViewModel.NAJVECJA_CENA) "brez meje"
             else "${state.maxPrice.toInt()} EUR"
-        Text("Proracun: ${state.minPrice.toInt()} - $zgornjaMeja", fontWeight = FontWeight.Medium)
+        Text("Proračun: ${state.minPrice.toInt()} - $zgornjaMeja", fontWeight = FontWeight.Medium)
         RangeSlider(
             value = state.minPrice..state.maxPrice,
             onValueChange = viewModel::onPriceRangeChange,
@@ -71,12 +71,12 @@ fun SearchScreen(
             onClick = { viewModel.search() },
             enabled = !state.isLoading,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (state.isLoading) "Iscem..." else "Poisci") }
+        ) { Text(if (state.isLoading) "Iščem..." else "Poišči") }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { navController.navigate(Destinations.RECOMMENDED_PROFILES) },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Priporoceni sostanovalci (po zdruzljivosti)") }
+        ) { Text("Priporočeni sostanovalci (po združljivosti)") }
 
         Spacer(Modifier.height(16.dp))
         if (state.errorMessage != null) {
@@ -134,7 +134,7 @@ fun RecommendedProfilesScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Priporoceni profili",
+            "Priporočeni profili",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(24.dp)
@@ -144,7 +144,7 @@ fun RecommendedProfilesScreen(
                 CircularProgressIndicator()
             }
             state.results.isEmpty() -> Text(
-                state.errorMessage ?: "Ni razpolozljivih profilov za priporocilo.",
+                state.errorMessage ?: "Ni razpoložljivih profilov za priporočilo.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -179,7 +179,7 @@ private fun RecommendedProfileCard(profile: Profile, compatibility: Int, onRepor
             Column(modifier = Modifier.weight(1f)) {
                 Text(profile.displayName.ifBlank { "Uporabnik" }, fontWeight = FontWeight.Medium)
                 Text(
-                    if (profile.academicStatusVerified) "Preverjen tuji student" else "student",
+                    if (profile.academicStatusVerified) "Preverjen tuji študent" else "študent",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

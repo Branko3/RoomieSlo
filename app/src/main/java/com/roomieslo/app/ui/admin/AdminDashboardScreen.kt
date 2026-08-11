@@ -35,7 +35,7 @@ fun AdminDashboardScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Administratorska plosca",
+            "Administratorska plošča",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(24.dp)
@@ -45,7 +45,7 @@ fun AdminDashboardScreen(
                 CircularProgressIndicator()
             }
             !state.isAdmin -> Text(
-                "Nimas administratorskih pravic.",
+                "Nimaš administratorskih pravic.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp)

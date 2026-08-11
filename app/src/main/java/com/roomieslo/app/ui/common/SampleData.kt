@@ -39,10 +39,10 @@ object SampleData {
     )
 
     val listings = listOf(
-        Listing("l1", "u2", "Ljubljana - Bezigrad", 320.0, "Svetla soba v skupnem stanovanju blizu FRI, na voljo od septembra.", false, "2026-07-24T09:15:00Z"),
-        Listing("l2", "u3", "Ljubljana - Center", 450.0, "Soba v prenovljenem stanovanju, 5 min od Presernovega trga.", false, "2026-07-22T14:40:00Z"),
-        Listing("l3", "u4", "Ljubljana - siska", 280.0, "Skupno bivanje s tremi studenti, kuhinja in dnevna soba v skupni rabi.", false, "2026-07-19T08:05:00Z"),
-        Listing("l4", "u5", "Ljubljana - Vic", 350.0, "Soba blizu studentskih naselij, dobra povezava z avtobusom.", true, "2026-07-15T17:30:00Z")
+        Listing("l1", "u2", "Ljubljana - Bežigrad", 320.0, "Svetla soba v skupnem stanovanju blizu FRI, na voljo od septembra.", false, "2026-07-24T09:15:00Z"),
+        Listing("l2", "u3", "Ljubljana - Center", 450.0, "Soba v prenovljenem stanovanju, 5 min od Prešernovega trga.", false, "2026-07-22T14:40:00Z"),
+        Listing("l3", "u4", "Ljubljana - Šiška", 280.0, "Skupno bivanje s tremi študenti, kuhinja in dnevna soba v skupni rabi.", false, "2026-07-19T08:05:00Z"),
+        Listing("l4", "u5", "Ljubljana - Vič", 350.0, "Soba blizu študentskih naselij, dobra povezava z avtobusom.", true, "2026-07-15T17:30:00Z")
     )
 
     val chats = listOf(
@@ -52,8 +52,8 @@ object SampleData {
     )
 
     val messages = listOf(
-        Message("msg1", "m1", "u2", "Pozdravljen, me zanima, ali je soba se na voljo?", DeliveryStatus.READ),
-        Message("msg2", "m1", "u1", "zivjo! Ja, je se prosta. Kdaj bi si jo zelel ogledati?", DeliveryStatus.READ),
+        Message("msg1", "m1", "u2", "Pozdravljen, me zanima, ali je soba še na voljo?", DeliveryStatus.READ),
+        Message("msg2", "m1", "u1", "Živjo! Ja, je še prosta. Kdaj bi si jo želel ogledati?", DeliveryStatus.READ),
         Message("msg3", "m1", "u2", "Se vidiva jutri ob 17h za ogled?", DeliveryStatus.DELIVERED)
     )
 }

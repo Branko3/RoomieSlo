@@ -49,7 +49,7 @@ class AuthViewModel @Inject constructor(
             } catch (e: Exception) {
                 // Pri prijavi je izvirno sporocilo koristno ("Invalid login credentials"),
                 // zato ga obdrzimo; zamenjamo le napake omreznega sloja.
-                uiState.copy(isLoading = false, errorMessage = e.uporabnisko(e.message ?: "Prislo je do napake."))
+                uiState.copy(isLoading = false, errorMessage = e.uporabnisko(e.message ?: "Prišlo je do napake."))
             }
         }
     }

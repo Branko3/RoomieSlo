@@ -91,7 +91,7 @@ fun ProfileScreen(
         }
         state.profile == null -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.errorMessage ?: "Profila ni bilo mogoce naloziti.")
+                Text(state.errorMessage ?: "Profila ni bilo mogoče naložiti.")
             }
         }
         else -> {
@@ -143,7 +143,7 @@ private fun ProfileContent(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.height(0.dp))
-                        Text(" Preverjen student", style = MaterialTheme.typography.bodySmall)
+                        Text(" Preverjen študent", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -160,9 +160,9 @@ private fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("Iscem sostanovalca / sobo", fontWeight = FontWeight.Medium)
+                    Text("Iščem sostanovalca / sobo", fontWeight = FontWeight.Medium)
                     Text(
-                        "Ko je izklopljeno, se tvoj profil ne prikazuje med priporocenimi zadetki.",
+                        "Ko je izklopljeno, se tvoj profil ne prikazuje med priporočenimi zadetki.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -175,8 +175,8 @@ private fun ProfileContent(
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Vprasalnik o zivljenjskem slogu", fontWeight = FontWeight.Medium)
-                // Stejemo samo trditve z utezjo: odgovor "Ne zelim odgovoriti" je zapisan
+                Text("Vprašalnik o življenjskem slogu", fontWeight = FontWeight.Medium)
+                // Stejemo samo trditve z utezjo: odgovor "Ne želim odgovoriti" je zapisan
                 // v bazi, a pri izracunu zdruzljivosti ne steje, zato tudi tu ni izpolnjen.
                 val izpolnjenih = profile.lifestyleAnswers.count { it.weight > 0f }
                 Text(
@@ -186,7 +186,7 @@ private fun ProfileContent(
                 )
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = onEditQuestionnaire) {
-                    Text(if (izpolnjenih == 0) "Izpolni vprasalnik" else "Uredi odgovore")
+                    Text(if (izpolnjenih == 0) "Izpolni vprašalnik" else "Uredi odgovore")
                 }
             }
         }
@@ -200,7 +200,7 @@ private fun ProfileContent(
             }
         }
         Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onOpenAdmin) { Text("Administratorska plosca") }
+        TextButton(onClick = onOpenAdmin) { Text("Administratorska plošča") }
     }
 
     if (showEditDialog) {
@@ -222,7 +222,7 @@ private fun ProfileContent(
                 }) { Text("Shrani") }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Preklici") }
+                TextButton(onClick = { showEditDialog = false }) { Text("Prekliči") }
             }
         )
     }
@@ -281,7 +281,7 @@ fun LifestyleQuestionnaireScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Vprasalnik o zivljenjskem slogu",
+                    "Vprašalnik o življenjskem slogu",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -292,8 +292,8 @@ fun LifestyleQuestionnaireScreen(
                 )
             }
             // Preskok je dosegljiv pri vsaki trditvi, ne sele na dnu seznama. Shrani enako
-            // kot glavni gumb, zato preostale trditve dobijo "Ne zelim odgovoriti".
-            TextButton(onClick = viewModel::shrani, enabled = !state.isSaving) { Text("Preskoci") }
+            // kot glavni gumb, zato preostale trditve dobijo "Ne želim odgovoriti".
+            TextButton(onClick = viewModel::shrani, enabled = !state.isSaving) { Text("Preskoči") }
         }
 
         LazyColumn(

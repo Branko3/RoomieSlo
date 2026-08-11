@@ -177,7 +177,7 @@ fun ListingDetailScreen(
             CircularProgressIndicator()
         }
         state.listing == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(state.errorMessage ?: "Oglasa ni bilo mogoce naloziti.")
+            Text(state.errorMessage ?: "Oglasa ni bilo mogoče naložiti.")
         }
         else -> {
             val listing = state.listing
@@ -223,7 +223,7 @@ fun ListingDetailScreen(
                         onClick = { viewModel.sendMatchRequest() },
                         enabled = !state.isRequestSent && !listing.isFilled,
                         modifier = Modifier.fillMaxWidth()
-                    ) { Text(if (state.isRequestSent) "Zahteva poslana" else "Poslji zahtevo za ujemanje") }
+                    ) { Text(if (state.isRequestSent) "Zahteva poslana" else "Pošlji zahtevo za ujemanje") }
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "Po sprejemu zahteve s strani lastnika oglasa se odpre klepet.",
@@ -243,12 +243,12 @@ fun ListingDetailScreen(
                             Text("Uredi oglas")
                         }
                         OutlinedButton(onClick = { viewModel.toggleFilled() }) {
-                            Text(if (listing.isFilled) "Oznaci kot na voljo" else "Oznaci kot zapolnjeno")
+                            Text(if (listing.isFilled) "Označi kot na voljo" else "Označi kot zapolnjeno")
                         }
                     }
                     Spacer(Modifier.height(4.dp))
                     TextButton(onClick = { showDeleteDialog = true }) {
-                        Text("Izbrisi oglas", color = MaterialTheme.colorScheme.error)
+                        Text("Izbriši oglas", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -256,16 +256,16 @@ fun ListingDetailScreen(
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
-                    title = { Text("Izbrisi oglas?") },
-                    text = { Text("Oglasa ne bo vec mogoce obnoviti.") },
+                    title = { Text("Izbriši oglas?") },
+                    text = { Text("Oglasa ne bo več mogoče obnoviti.") },
                     confirmButton = {
                         TextButton(onClick = {
                             showDeleteDialog = false
                             viewModel.delete()
-                        }) { Text("Izbrisi", color = MaterialTheme.colorScheme.error) }
+                        }) { Text("Izbriši", color = MaterialTheme.colorScheme.error) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) { Text("Preklici") }
+                        TextButton(onClick = { showDeleteDialog = false }) { Text("Prekliči") }
                     }
                 )
             }

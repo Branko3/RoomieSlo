@@ -12,7 +12,7 @@ import javax.inject.Inject
  * Delimo z vsoto utezi tistih trditev, na katere sta odgovorila oba, zato je rezultat
  * na intervalu 0..1 ne glede na stevilo odgovorjenih trditev.
  *
- * Utez trditve je manjsa od obeh utezi: odgovor "Ne zelim odgovoriti" je shranjen z
+ * Utez trditve je manjsa od obeh utezi: odgovor "Ne želim odgovoriti" je shranjen z
  * utezjo 0, zato taka trditev odpade ne glede na to, kateri od profilov je ni podal.
  * Brez tega bi nevtralna vrednost neizrecenega odgovora navidezno povecala ujemanje.
  *

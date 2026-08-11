@@ -46,7 +46,7 @@ class AcademicVerificationViewModel @Inject constructor(
                 }
                 val bytes = withContext(Dispatchers.IO) {
                     context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                } ?: throw IllegalStateException("Datoteke ni bilo mogoce prebrati.")
+                } ?: throw IllegalStateException("Datoteke ni bilo mogoče prebrati.")
                 authRepository.uploadAcademicProof(bytes, extension)
                 uiState.copy(isUploading = false, isUploaded = true)
             } catch (e: Exception) {
