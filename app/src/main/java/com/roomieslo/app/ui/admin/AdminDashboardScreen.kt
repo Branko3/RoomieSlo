@@ -79,7 +79,7 @@ fun AdminDashboardScreen(
                             val resolved = report.status != "open"
                             AssistChip(
                                 onClick = { viewModel.toggleStatus(report) },
-                                label = { Text(if (resolved) "Reseno" else "Odprto") },
+                                label = { Text(if (resolved) "Rešeno" else "Odprto") },
                                 colors = if (!resolved) AssistChipDefaults.assistChipColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer
                                 ) else AssistChipDefaults.assistChipColors()
