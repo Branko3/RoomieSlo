@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.roomieslo.app.data.repository.FavoriteRepository
 import com.roomieslo.app.data.repository.ListingRepository
 import com.roomieslo.app.data.repository.MatchRepository
+import com.roomieslo.app.data.repository.PodatkiOglasa
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.ui.common.uporabnisko
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -228,9 +229,28 @@ data class CreateListingUiState(
     val location: String = "",
     val price: String = "",
     val description: String = "",
+    // Predstavitvena polja. Stevilcna so v obliki niza, ker prihajajo iz besedilnih polj;
+    // v stevilo se pretvorijo sele ob shranjevanju, prazno polje pa pomeni "ni podatka".
+    val title: String = "",
+    val roomType: String = "",
+    val district: String = "",
+    val availableFrom: String = "",
+    val sizeSqm: String = "",
+    val deposit: String = "",
+    val billsIncluded: Boolean = false,
+    val furnished: Boolean = false,
+    val flatmates: String = "",
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val errorMessage: String? = null
+)
+
+/** Vrste nastanitve, ponujene pri objavi oglasa. Vrednost se v bazo zapise kot besedilo. */
+val VRSTE_NASTANITVE = listOf("soba", "garsonjera", "deljeno stanovanje", "celo stanovanje")
+
+/** Ljubljanske cetrti, ponujene pri objavi oglasa. */
+val CETRTI = listOf(
+    "Bežigrad", "Center", "Šiška", "Vič", "Moste", "Rudnik", "Trnovo", "Rožna dolina", "Črnuče"
 )
 
 @HiltViewModel
@@ -252,7 +272,16 @@ class CreateListingViewModel @Inject constructor(
                     uiState = uiState.copy(
                         location = l.location,
                         price = l.pricePerMonth.toInt().toString(),
-                        description = l.description
+                        description = l.description,
+                        title = l.title,
+                        roomType = l.roomType,
+                        district = l.district,
+                        availableFrom = l.availableFrom.orEmpty(),
+                        sizeSqm = l.sizeSqm?.toString().orEmpty(),
+                        deposit = l.deposit?.toInt()?.toString().orEmpty(),
+                        billsIncluded = l.billsIncluded,
+                        furnished = l.furnished,
+                        flatmates = l.flatmatesCount.takeIf { it > 0 }?.toString().orEmpty()
                     )
                 }
             }
@@ -262,6 +291,15 @@ class CreateListingViewModel @Inject constructor(
     fun onLocationChange(v: String) { uiState = uiState.copy(location = v) }
     fun onPriceChange(v: String) { uiState = uiState.copy(price = v.filter { it.isDigit() }) }
     fun onDescriptionChange(v: String) { uiState = uiState.copy(description = v) }
+    fun onTitleChange(v: String) { uiState = uiState.copy(title = v) }
+    fun onRoomTypeChange(v: String) { uiState = uiState.copy(roomType = v) }
+    fun onDistrictChange(v: String) { uiState = uiState.copy(district = v) }
+    fun onAvailableFromChange(v: String) { uiState = uiState.copy(availableFrom = v) }
+    fun onSizeChange(v: String) { uiState = uiState.copy(sizeSqm = v.filter { it.isDigit() }) }
+    fun onDepositChange(v: String) { uiState = uiState.copy(deposit = v.filter { it.isDigit() }) }
+    fun onBillsChange(v: Boolean) { uiState = uiState.copy(billsIncluded = v) }
+    fun onFurnishedChange(v: Boolean) { uiState = uiState.copy(furnished = v) }
+    fun onFlatmatesChange(v: String) { uiState = uiState.copy(flatmates = v.filter { it.isDigit() }) }
 
     fun save() {
         if (uiState.isSaving) return
@@ -270,18 +308,43 @@ class CreateListingViewModel @Inject constructor(
             uiState = uiState.copy(errorMessage = "Vnesi lokacijo in ceno.")
             return
         }
+        // Datum se vnasa rocno, zato ga preverimo, preden ga poslje v stolpec tipa date --
+        // sicer bi zavrnitev prisla sele s streznika, kot nerazumljiva napaka.
+        val datum = uiState.availableFrom.trim()
+        if (datum.isNotEmpty() && !JE_DATUM.matches(datum)) {
+            uiState = uiState.copy(errorMessage = "Datum vselitve vpisi v obliki LLLL-MM-DD.")
+            return
+        }
         uiState = uiState.copy(isSaving = true, errorMessage = null)
+        val podatki = PodatkiOglasa(
+            location = uiState.location,
+            pricePerMonth = price,
+            description = uiState.description,
+            title = uiState.title,
+            roomType = uiState.roomType,
+            district = uiState.district,
+            availableFrom = datum.ifEmpty { null },
+            sizeSqm = uiState.sizeSqm.toIntOrNull(),
+            deposit = uiState.deposit.toDoubleOrNull(),
+            billsIncluded = uiState.billsIncluded,
+            furnished = uiState.furnished,
+            flatmatesCount = uiState.flatmates.toIntOrNull() ?: 0
+        )
         viewModelScope.launch {
             uiState = try {
                 if (editingId != null) {
-                    listingRepository.updateListing(editingId, uiState.location, price, uiState.description)
+                    listingRepository.updateListing(editingId, podatki)
                 } else {
-                    listingRepository.createListing(uiState.location, price, uiState.description)
+                    listingRepository.createListing(podatki)
                 }
                 uiState.copy(isSaving = false, isSaved = true)
             } catch (e: Exception) {
                 uiState.copy(isSaving = false, errorMessage = e.uporabnisko("Shranjevanje ni uspelo."))
             }
         }
+    }
+
+    private companion object {
+        val JE_DATUM = Regex("""\d{4}-\d{2}-\d{2}""")
     }
 }

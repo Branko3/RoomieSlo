@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roomieslo.app.data.repository.AdminRepository
 import com.roomieslo.app.data.repository.AuthRepository
 import com.roomieslo.app.data.repository.ProfileRepository
 import com.roomieslo.app.domain.model.Profile
@@ -18,13 +19,21 @@ data class ProfileUiState(
     val isLoading: Boolean = true,
     val profile: Profile? = null,
     val errorMessage: String? = null,
-    val isSignedOut: Boolean = false
+    val isSignedOut: Boolean = false,
+    /**
+     * Ali ima prijavljeni uporabnik vrstico v tabeli `admins` (F20).
+     *
+     * Privzeto false: vstop v administratorsko plosco je treba pokazati sele, ko je
+     * pravica potrjena, in ne dokler se preverja.
+     */
+    val isAdmin: Boolean = false
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val adminRepository: AdminRepository
 ) : ViewModel() {
 
     var uiState by mutableStateOf(ProfileUiState())
@@ -37,7 +46,14 @@ class ProfileViewModel @Inject constructor(
         uiState = uiState.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             uiState = try {
-                uiState.copy(isLoading = false, profile = profileRepository.getMyProfile())
+                // Pravico preverimo ob vsakem nalaganju profila, ne enkrat ob prijavi:
+                // vrstico v `admins` lahko kdo doda ali odstrani med sejo.
+                val jeAdmin = runCatching { adminRepository.isAdmin() }.getOrDefault(false)
+                uiState.copy(
+                    isLoading = false,
+                    profile = profileRepository.getMyProfile(),
+                    isAdmin = jeAdmin
+                )
             } catch (e: Exception) {
                 uiState.copy(isLoading = false, errorMessage = e.uporabnisko("Napaka pri nalaganju profila."))
             }

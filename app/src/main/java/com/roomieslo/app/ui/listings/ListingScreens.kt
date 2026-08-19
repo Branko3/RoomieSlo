@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -25,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +60,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.ui.common.NaloziObKoncu
+import com.roomieslo.app.ui.common.PodatekStolpec
+import com.roomieslo.app.ui.common.VrstaZnack
+import com.roomieslo.app.ui.common.Znacka
+import com.roomieslo.app.ui.common.datumVselitve
+import com.roomieslo.app.ui.common.jeNov
+import com.roomieslo.app.ui.common.podrobnostiOglasa
+import com.roomieslo.app.ui.common.zeZiviV
 
 @Composable
 fun ListingListScreen(
@@ -135,6 +147,14 @@ fun ListingListScreen(
     }
 }
 
+/**
+ * Kartica oglasa v seznamu.
+ *
+ * Zgradba sledi ureditvi, ki jo uporabljajo primerljive resitve: najprej znacke s stanjem,
+ * nato naslov in lokacija, nato cena in datum vselitve v dveh stolpcih, na dnu pa drobne
+ * podrobnosti. Prazna polja se izpustijo, zato je kartica pri skopo izpolnjenem oglasu
+ * krajsa, nikoli pa ne prikaze prazne vrstice.
+ */
 @Composable
 private fun ListingCard(listing: Listing, onClick: () -> Unit) {
     Card(
@@ -143,19 +163,60 @@ private fun ListingCard(listing: Listing, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(listing.location, fontWeight = FontWeight.Medium)
+            val znacke = listOf(
+                listing.roomType.takeIf { it.isNotBlank() },
+                "Novo".takeIf { jeNov(listing.createdAt) },
+                "Opremljeno".takeIf { listing.furnished },
+                "Stroški vključeni".takeIf { listing.billsIncluded }
+            ).filterNotNull()
+            if (znacke.isNotEmpty()) {
+                VrstaZnack { znacke.forEach { Znacka(it) } }
+                Spacer(Modifier.height(10.dp))
             }
-            Spacer(Modifier.height(4.dp))
-            Text(listing.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
-            Spacer(Modifier.height(8.dp))
+
             Text(
-                "${listing.pricePerMonth.toInt()} EUR / mesec",
+                listing.displayTitle,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             )
+            Spacer(Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    listing.displayLocation,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                PodatekStolpec(
+                    oznaka = "Najemnina",
+                    vrednost = "${listing.pricePerMonth.toInt()} € / mesec",
+                    modifier = Modifier.weight(1f)
+                )
+                PodatekStolpec(
+                    oznaka = "Na voljo od",
+                    vrednost = datumVselitve(listing.availableFrom)
+                )
+            }
+
+            val podrobnosti = podrobnostiOglasa(listing)
+            if (podrobnosti.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    podrobnosti,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -191,7 +252,12 @@ fun ListingDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(listing.location, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        listing.displayTitle,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
                     IconButton(onClick = { viewModel.toggleFavorite() }) {
                         Icon(
                             if (state.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -200,7 +266,21 @@ fun ListingDetailScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        listing.displayLocation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
                 Text(
                     "${listing.pricePerMonth.toInt()} EUR / mesec",
                     style = MaterialTheme.typography.titleLarge,
@@ -214,6 +294,38 @@ fun ListingDetailScreen(
                         containerColor = MaterialTheme.colorScheme.errorContainer
                     ) else AssistChipDefaults.assistChipColors()
                 )
+
+                // Lastnosti nastanitve. Vsaka znacka je odvisna od svojega polja, zato
+                // oglas brez izpolnjenih podatkov tu preprosto ne prikaze nicesar.
+                val lastnosti = listOf(
+                    listing.roomType.takeIf { it.isNotBlank() },
+                    "Opremljeno".takeIf { listing.furnished },
+                    "Stroški vključeni".takeIf { listing.billsIncluded }
+                ).filterNotNull()
+                if (lastnosti.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    VrstaZnack { lastnosti.forEach { Znacka(it) } }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    PodatekStolpec("Na voljo od", datumVselitve(listing.availableFrom), Modifier.weight(1f))
+                    listing.sizeSqm?.let {
+                        PodatekStolpec("Velikost", "$it m²", Modifier.weight(1f))
+                    }
+                    listing.deposit?.let {
+                        PodatekStolpec("Varščina", "${it.toInt()} €", Modifier.weight(1f))
+                    }
+                }
+                if (listing.flatmatesCount > 0) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        zeZiviV(listing.flatmatesCount),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Spacer(Modifier.height(16.dp))
                 Text(listing.description, style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.height(24.dp))
@@ -287,6 +399,7 @@ fun CreateListingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
         Text(
@@ -295,6 +408,16 @@ fun CreateListingScreen(
             fontWeight = FontWeight.Bold
         )
         Spacer(Modifier.height(20.dp))
+        OutlinedTextField(
+            value = state.title,
+            onValueChange = viewModel::onTitleChange,
+            label = { Text("Naslov oglasa") },
+            supportingText = { Text("Npr. Svetla soba blizu FRI") },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = state.location,
             onValueChange = viewModel::onLocationChange,
@@ -310,6 +433,100 @@ fun CreateListingScreen(
             enabled = !state.isSaving,
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(Modifier.height(20.dp))
+        Text("Vrsta nastanitve", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+        Spacer(Modifier.height(8.dp))
+        // Zaprt nabor namesto prostega vnosa: enake vrednosti so pogoj, da je kasneje
+        // mogoce filtrirati po vrsti nastanitve.
+        VrstaZnack {
+            VRSTE_NASTANITVE.forEach { vrsta ->
+                FilterChip(
+                    selected = state.roomType == vrsta,
+                    onClick = { viewModel.onRoomTypeChange(if (state.roomType == vrsta) "" else vrsta) },
+                    label = { Text(vrsta) },
+                    enabled = !state.isSaving
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Text("Četrt", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+        Spacer(Modifier.height(8.dp))
+        VrstaZnack {
+            CETRTI.forEach { cetrt ->
+                FilterChip(
+                    selected = state.district == cetrt,
+                    onClick = { viewModel.onDistrictChange(if (state.district == cetrt) "" else cetrt) },
+                    label = { Text(cetrt) },
+                    enabled = !state.isSaving
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(
+            value = state.availableFrom,
+            onValueChange = viewModel::onAvailableFromChange,
+            label = { Text("Na voljo od") },
+            supportingText = { Text("LLLL-MM-DD; prazno pomeni po dogovoru") },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = state.sizeSqm,
+                onValueChange = viewModel::onSizeChange,
+                label = { Text("Velikost (m²)") },
+                singleLine = true,
+                enabled = !state.isSaving,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = state.deposit,
+                onValueChange = viewModel::onDepositChange,
+                label = { Text("Varščina (EUR)") },
+                singleLine = true,
+                enabled = !state.isSaving,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        OutlinedTextField(
+            value = state.flatmates,
+            onValueChange = viewModel::onFlatmatesChange,
+            label = { Text("Število sostanovalcev") },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Stroški vključeni v ceno", modifier = Modifier.weight(1f))
+            Switch(
+                checked = state.billsIncluded,
+                onCheckedChange = viewModel::onBillsChange,
+                enabled = !state.isSaving
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Opremljeno", modifier = Modifier.weight(1f))
+            Switch(
+                checked = state.furnished,
+                onCheckedChange = viewModel::onFurnishedChange,
+                enabled = !state.isSaving
+            )
+        }
+
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = state.description,

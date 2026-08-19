@@ -103,6 +103,7 @@ class ProfileRepository @Inject constructor(
         /** Profil z vgnezdenimi odgovori vprasalnika v enem obhodu. */
         private val PROFILE_WITH_ANSWERS = Columns.raw(
             "id, display_name, academic_status_verified, is_available, " +
+                "age, faculty, bio, avatar_url, " +
                 "questionnaire_answers(profile_id, question_id, value, weight)"
         )
     }

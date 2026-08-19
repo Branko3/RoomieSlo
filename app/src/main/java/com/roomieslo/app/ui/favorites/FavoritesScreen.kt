@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,6 +33,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
+import com.roomieslo.app.ui.common.datumVselitve
 
 @Composable
 fun FavoritesScreen(
@@ -86,12 +89,25 @@ fun FavoritesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text(listing.location, fontWeight = FontWeight.Medium)
+                            // Naslov in cetrt, ne le mesto -- shranjeni oglasi so pogosto
+                            // iz istega mesta in bi bili sicer med sabo nerazlocljivi.
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "${listing.pricePerMonth.toInt()} EUR / mesec",
+                                    listing.displayTitle,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    listing.displayLocation,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "${listing.pricePerMonth.toInt()} € / mesec · ${datumVselitve(listing.availableFrom)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                             IconButton(onClick = { viewModel.remove(listing.id) }) {

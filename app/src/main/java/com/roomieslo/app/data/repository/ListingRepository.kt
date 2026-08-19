@@ -28,6 +28,38 @@ data class StranOglasov(
 )
 
 /**
+ * Vnosni podatki oglasa, kot jih izpolni uporabnik pri objavi ali urejanju.
+ *
+ * Loceni od [Listing], ker ta nosi tudi polja, ki jih doloci baza sama -- `id`, `owner_id`,
+ * `created_at` in `is_filled`. Vsa polja razen prvih treh imajo privzeto vrednost, ker jih
+ * uporabnik ni dolzan izpolniti.
+ */
+data class PodatkiOglasa(
+    val location: String,
+    val pricePerMonth: Double,
+    val description: String,
+    val title: String = "",
+    val roomType: String = "",
+    val district: String = "",
+    /** ISO 8601 (2026-09-01). Null pomeni "po dogovoru" in se v bazo zapise kot NULL. */
+    val availableFrom: String? = null,
+    val sizeSqm: Int? = null,
+    val deposit: Double? = null,
+    val billsIncluded: Boolean = false,
+    val furnished: Boolean = false,
+    val flatmatesCount: Int = 0
+) {
+    /** Odrezani robni presledki. Klice se na enem mestu, da se ne pozabi pri kaksnem polju. */
+    fun ocisceni() = copy(
+        location = location.trim(),
+        description = description.trim(),
+        title = title.trim(),
+        roomType = roomType.trim(),
+        district = district.trim()
+    )
+}
+
+/**
  * F06-F10, F19: oglasi za sobe ter iskanje po lokaciji in proracunu.
  *
  * Filtriranje in razvrscanje se izvajata na strezniku prek PostgREST
@@ -143,19 +175,44 @@ class ListingRepository @Inject constructor(
             .decodeSingleOrNull<ListingDto>()?.toDomain()
 
     /** F06: ustvari nov oglas (owner_id = trenutni uporabnik). */
-    suspend fun createListing(location: String, pricePerMonth: Double, description: String) {
+    suspend fun createListing(podatki: PodatkiOglasa) {
         val uid = authRepository.currentUserId() ?: return
+        val p = podatki.ocisceni()
         supabase.from("listings").insert(
-            NewListingDto(ownerId = uid, location = location.trim(), pricePerMonth = pricePerMonth, description = description.trim())
+            NewListingDto(
+                ownerId = uid,
+                location = p.location,
+                pricePerMonth = p.pricePerMonth,
+                description = p.description,
+                title = p.title,
+                roomType = p.roomType,
+                district = p.district,
+                availableFrom = p.availableFrom,
+                sizeSqm = p.sizeSqm,
+                deposit = p.deposit,
+                billsIncluded = p.billsIncluded,
+                furnished = p.furnished,
+                flatmatesCount = p.flatmatesCount
+            )
         )
     }
 
     /** F19: uredi obstojeci oglas. */
-    suspend fun updateListing(id: String, location: String, pricePerMonth: Double, description: String) {
+    suspend fun updateListing(id: String, podatki: PodatkiOglasa) {
+        val p = podatki.ocisceni()
         supabase.from("listings").update({
-            set("location", location.trim())
-            set("price_per_month", pricePerMonth)
-            set("description", description.trim())
+            set("location", p.location)
+            set("price_per_month", p.pricePerMonth)
+            set("description", p.description)
+            set("title", p.title)
+            set("room_type", p.roomType)
+            set("district", p.district)
+            set("available_from", p.availableFrom)
+            set("size_sqm", p.sizeSqm)
+            set("deposit", p.deposit)
+            set("bills_included", p.billsIncluded)
+            set("furnished", p.furnished)
+            set("flatmates_count", p.flatmatesCount)
         }) { filter { eq("id", id) } }
     }
 
@@ -184,7 +241,11 @@ class ListingRepository @Inject constructor(
          * SELECT *, kar po nepotrebnem prenasa se preostale stolpce tabele.
          */
         private val LISTING_COLUMNS = Columns.list(
-            "id", "owner_id", "location", "price_per_month", "description", "is_filled", "created_at"
+            "id", "owner_id", "location", "price_per_month", "description", "is_filled", "created_at",
+            // Predstavitvena polja (migracija 0002). Berejo se ze v seznamu, ne sele v
+            // podrobnostih -- prav zato, da kartica prikaze vec kot lokacijo in ceno.
+            "title", "room_type", "district", "available_from", "size_sqm", "deposit",
+            "bills_included", "furnished", "flatmates_count", "photo_url"
         )
     }
 }

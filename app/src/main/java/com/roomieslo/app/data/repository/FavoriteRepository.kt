@@ -56,8 +56,12 @@ class FavoriteRepository @Inject constructor(
     }
 
     companion object {
+        // Vgnezdeni oglas mora vrniti iste stolpce kot seznam oglasov, sicer je kartica
+        // med priljubljenimi videti drugace kot ista kartica v seznamu.
         private val FAVORITE_WITH_LISTING = Columns.raw(
-            "listing_id, listings(id, owner_id, location, price_per_month, description, is_filled, created_at)"
+            "listing_id, listings(id, owner_id, location, price_per_month, description, is_filled, " +
+                "created_at, title, room_type, district, available_from, size_sqm, deposit, " +
+                "bills_included, furnished, flatmates_count, photo_url)"
         )
     }
 }

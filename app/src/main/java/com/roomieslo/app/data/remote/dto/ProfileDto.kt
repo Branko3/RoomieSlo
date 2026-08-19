@@ -8,20 +8,31 @@ import kotlinx.serialization.Serializable
 /**
  * Prenosni objekt za tabelo `public.profiles` (PostgREST).
  * Imena polj ustrezajo stolpcem v bazi (snake_case) prek @SerialName.
+ *
+ * Predstavitvena polja (age, faculty, bio, avatar_url) so iz migracije 0002 in imajo
+ * privzete vrednosti, ker jih profili, ustvarjeni pred migracijo, nimajo izpolnjenih.
  */
 @Serializable
 data class ProfileDto(
     val id: String,
     @SerialName("display_name") val displayName: String = "",
     @SerialName("academic_status_verified") val academicStatusVerified: Boolean = false,
-    @SerialName("is_available") val isAvailable: Boolean = true
+    @SerialName("is_available") val isAvailable: Boolean = true,
+    val age: Int? = null,
+    val faculty: String = "",
+    val bio: String = "",
+    @SerialName("avatar_url") val avatarUrl: String = ""
 ) {
     fun toDomain(lifestyleAnswers: List<LifestyleAnswer> = emptyList()) = Profile(
         userId = id,
         displayName = displayName,
         academicStatusVerified = academicStatusVerified,
         isAvailable = isAvailable,
-        lifestyleAnswers = lifestyleAnswers
+        lifestyleAnswers = lifestyleAnswers,
+        age = age,
+        faculty = faculty,
+        bio = bio,
+        avatarUrl = avatarUrl
     )
 }
 
@@ -37,6 +48,10 @@ data class ProfileWithAnswersDto(
     @SerialName("display_name") val displayName: String = "",
     @SerialName("academic_status_verified") val academicStatusVerified: Boolean = false,
     @SerialName("is_available") val isAvailable: Boolean = true,
+    val age: Int? = null,
+    val faculty: String = "",
+    val bio: String = "",
+    @SerialName("avatar_url") val avatarUrl: String = "",
     @SerialName("questionnaire_answers") val answers: List<QuestionnaireAnswerDto> = emptyList()
 ) {
     fun toDomain() = Profile(
@@ -44,6 +59,10 @@ data class ProfileWithAnswersDto(
         displayName = displayName,
         academicStatusVerified = academicStatusVerified,
         isAvailable = isAvailable,
-        lifestyleAnswers = answers.map { it.toDomain() }
+        lifestyleAnswers = answers.map { it.toDomain() },
+        age = age,
+        faculty = faculty,
+        bio = bio,
+        avatarUrl = avatarUrl
     )
 }

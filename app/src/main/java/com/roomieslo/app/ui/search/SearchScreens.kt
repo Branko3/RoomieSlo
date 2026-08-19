@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +36,13 @@ import androidx.navigation.compose.rememberNavController
 import com.roomieslo.app.domain.model.Listing
 import com.roomieslo.app.domain.model.Profile
 import com.roomieslo.app.ui.common.NaloziObKoncu
+import com.roomieslo.app.ui.common.PodatekStolpec
+import com.roomieslo.app.ui.common.VrstaZnack
+import com.roomieslo.app.ui.common.Znacka
+import com.roomieslo.app.ui.common.ZnackaPreverjen
+import com.roomieslo.app.ui.common.datumVselitve
+import com.roomieslo.app.ui.common.jeNov
+import com.roomieslo.app.ui.common.podrobnostiOglasa
 import com.roomieslo.app.ui.navigation.Destinations
 
 @Composable
@@ -99,12 +107,43 @@ fun SearchScreen(
                     onClick = { navController.navigate("listing_detail/${listing.id}") }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(listing.location, fontWeight = FontWeight.Medium)
+                        val znacke = listOf(
+                            listing.roomType.takeIf { it.isNotBlank() },
+                            "Novo".takeIf { jeNov(listing.createdAt) },
+                            "Stroški vključeni".takeIf { listing.billsIncluded }
+                        ).filterNotNull()
+                        if (znacke.isNotEmpty()) {
+                            VrstaZnack { znacke.forEach { Znacka(it) } }
+                            Spacer(Modifier.height(8.dp))
+                        }
                         Text(
-                            "${listing.pricePerMonth.toInt()} EUR / mesec",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                            listing.displayTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
+                        Text(
+                            listing.displayLocation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            PodatekStolpec(
+                                "Najemnina",
+                                "${listing.pricePerMonth.toInt()} € / mesec",
+                                Modifier.weight(1f)
+                            )
+                            PodatekStolpec("Na voljo od", datumVselitve(listing.availableFrom))
+                        }
+                        val podrobnosti = podrobnostiOglasa(listing)
+                        if (podrobnosti.isNotEmpty()) {
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                podrobnosti,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -166,37 +205,74 @@ fun RecommendedProfilesScreen(
     }
 }
 
+/**
+ * Kartica priporocenega profila.
+ *
+ * Ime, starost in fakulteta so kontekst, ki ga uporabnik potrebuje, preden se odloci za
+ * zahtevo; preverjeni akademski status je prikazan kot znacka in ne kot besedilo, ker je
+ * to lastnost, ki je konkurencne resitve nimajo.
+ */
 @Composable
 private fun RecommendedProfileCard(profile: Profile, compatibility: Int, onReport: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(profile.displayName.ifBlank { "Uporabnik" }, fontWeight = FontWeight.Medium)
-                Text(
-                    if (profile.academicStatusVerified) "Preverjen tuji študent" else "študent",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                TextButton(onClick = onReport, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
-                    Text("Prijavi", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        imeInStarost(profile),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (profile.faculty.isNotBlank()) {
+                        Text(
+                            profile.faculty,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+                    Text(
+                        "$compatibility%",
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
-            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+
+            Spacer(Modifier.height(10.dp))
+            VrstaZnack {
+                if (profile.academicStatusVerified) ZnackaPreverjen()
+                if (profile.isAvailable) Znacka("Išče sostanovalca")
+            }
+
+            if (profile.bio.isNotBlank()) {
+                Spacer(Modifier.height(10.dp))
                 Text(
-                    "$compatibility%",
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    profile.bio,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
+
+            TextButton(onClick = onReport, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                Text("Prijavi", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
         }
     }
+}
+
+/** "Ana K., 22" ali samo ime, ce starost ni vpisana. */
+private fun imeInStarost(profile: Profile): String {
+    val ime = profile.displayName.ifBlank { "Uporabnik" }
+    return profile.age?.let { "$ime, $it" } ?: ime
 }
 
 @Preview(showBackground = true)

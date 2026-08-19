@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
@@ -98,6 +99,7 @@ fun ProfileScreen(
             ProfileContent(
                 profile = state.profile,
                 questionCount = Vprasalnik.trditve.size,
+                isAdmin = state.isAdmin,
                 onAvailabilityChange = viewModel::setAvailability,
                 onNameSave = viewModel::updateDisplayName,
                 onEditQuestionnaire = { navController.navigate(Destinations.LIFESTYLE_QUESTIONNAIRE) },
@@ -112,6 +114,7 @@ fun ProfileScreen(
 private fun ProfileContent(
     profile: Profile,
     questionCount: Int,
+    isAdmin: Boolean,
     onAvailabilityChange: (Boolean) -> Unit,
     onNameSave: (String) -> Unit,
     onEditQuestionnaire: () -> Unit,
@@ -159,7 +162,9 @@ private fun ProfileContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                // Besedilo mora dobiti utez, sicer zavzame vso sirino in stikalo potisne
+                // cez desni rob kartice.
+                Column(modifier = Modifier.weight(1f)) {
                     Text("Iščem sostanovalca / sobo", fontWeight = FontWeight.Medium)
                     Text(
                         "Ko je izklopljeno, se tvoj profil ne prikazuje med priporočenimi zadetki.",
@@ -167,6 +172,7 @@ private fun ProfileContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Spacer(Modifier.width(12.dp))
                 Switch(checked = profile.isAvailable, onCheckedChange = onAvailabilityChange)
             }
         }
@@ -199,8 +205,13 @@ private fun ProfileContent(
                 Text("Odjava", color = MaterialTheme.colorScheme.error)
             }
         }
-        Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onOpenAdmin) { Text("Administratorska plošča") }
+        // F20: vstop v administratorsko plosco vidi samo administrator. Skrivanje gumba
+        // ni varnostni ukrep -- zapise v `reports` varuje RLS --, je pa razlog, da navaden
+        // uporabnik ne odpre zaslona, ki mu nima kaj pokazati.
+        if (isAdmin) {
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onOpenAdmin) { Text("Administratorska plošča") }
+        }
     }
 
     if (showEditDialog) {
@@ -234,6 +245,7 @@ private fun ProfileScreenPreview() {
     ProfileContent(
         profile = SampleData.profile,
         questionCount = Vprasalnik.trditve.size,
+        isAdmin = false,
         onAvailabilityChange = {},
         onNameSave = {},
         onEditQuestionnaire = {},

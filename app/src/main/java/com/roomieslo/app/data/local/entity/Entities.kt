@@ -10,6 +10,10 @@ data class ProfileEntity(
     val displayName: String,
     val academicStatusVerified: Boolean,
     val isAvailable: Boolean,
+    val age: Int? = null,
+    val faculty: String = "",
+    val bio: String = "",
+    val avatarUrl: String = "",
     val lastSyncedAt: Long
 )
 
@@ -30,6 +34,18 @@ data class ListingEntity(
     val isFilled: Boolean,
     /** ISO 8601, enako kot na strezniku -- niz se v tem zapisu pravilno primerja tudi leksikografsko. */
     val createdAt: String,
+    // Polja iz migracije 0002. Predpomnilnik jih hrani, da je kartica v seznamu polna
+    // tudi brez omrezne povezave -- sicer bi oglas brez povezave izgubil vecino prikaza.
+    val title: String = "",
+    val roomType: String = "",
+    val district: String = "",
+    val availableFrom: String? = null,
+    val sizeSqm: Int? = null,
+    val deposit: Double? = null,
+    val billsIncluded: Boolean = false,
+    val furnished: Boolean = false,
+    val flatmatesCount: Int = 0,
+    val photoUrl: String = "",
     val lastSyncedAt: Long
 )
 
