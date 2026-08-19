@@ -50,14 +50,13 @@ data class Trditev(val id: String, val besedilo: String, val utez: Float)
  * Nabor trditev vprasalnika. Trditve so zapisane kot izjave, ne kot vprasanja,
  * ker uporabnik izraza stopnjo strinjanja z njimi.
  *
- * Utezi so izracunane iz ankete med studenti v Sloveniji (n = 20, avgust 2026). Anketiranci so
+ * Utezi so izracunane iz ankete med studenti v Sloveniji (n = 43, dva kroga julija 2026). Anketiranci so
  * za vsako temo na lestvici 1..5 ocenili, kako pomembno jim je, da se s sostanovalcem ujemata;
  * utez je povprecje teme, deljeno z vsoto povprecij vseh ohranjenih tem. Tri teme s povprecjem
  * pod 2,5 (skupno kuhanje, cas preziveti skupaj, jezik doma) v vprasalnik niso vkljucene.
  *
- * Vsota utezi je 0,9999 in ne tocno 1 zaradi zaokrozevanja. To ni napaka in ne potrebuje
- * popravka: izracun zdruzljivosti deli z vsoto utezi tistih trditev, na katere sta odgovorila
- * oba uporabnika, zato skupna vsota na rezultat ne vpliva.
+ * Vsota utezi je 1,0000. Na rezultat to tako ali tako ne vpliva: izracun zdruzljivosti deli
+ * z vsoto utezi tistih trditev, na katere sta odgovorila oba uporabnika, in ne s skupno vsoto.
  *
  * Trditve so nastete od najvecje utezi navzdol. Uporabnik lahko vprasalnik kadar koli preskoci,
  * zato so na vrhu tiste, ki na rezultat najbolj vplivajo.
@@ -67,16 +66,16 @@ data class Trditev(val id: String, val besedilo: String, val utez: Float)
  */
 object Vprasalnik {
     val trditve = listOf(
-        Trditev("q_cleanliness", "Skupni prostori morajo biti vedno pospravljeni.", 0.1099f),
+        Trditev("q_cleanliness", "Skupni prostori morajo biti vedno pospravljeni.", 0.1056f),
         Trditev("q_costs", "Svoj del stroškov poravnam do dogovorjenega roka.", 0.1056f),
-        Trditev("q_smoking", "Kajenje v stanovanju me ne moti.", 0.1008f),
-        Trditev("q_chores", "Gospodinjska opravila naj bodo razdeljena po dogovorjenem razporedu.", 0.0992f),
-        Trditev("q_parties", "Občasne zabave v stanovanju me ne motijo.", 0.0952f),
-        Trditev("q_pets", "V stanovanju bi rad(a) imel(a) hišnega ljubljenčka.", 0.0950f),
-        Trditev("q_noise", "Zvečer imam rad(a) mir in tišino.", 0.0904f),
-        Trditev("q_study", "Doma se pogosto učim in takrat potrebujem mir.", 0.0856f),
-        Trditev("q_guests", "Vesel(a) sem, če so v stanovanju pogosto obiski.", 0.0820f),
-        Trditev("q_overnight", "Ne moti me, če gostje ali partner(ka) prespijo v stanovanju.", 0.0687f),
-        Trditev("q_wake", "Zjutraj vstajam zgodaj in zvečer hodim zgodaj spat.", 0.0675f)
+        Trditev("q_smoking", "Kajenje v stanovanju me ne moti.", 0.1007f),
+        Trditev("q_parties", "Občasne zabave v stanovanju me ne motijo.", 0.0977f),
+        Trditev("q_noise", "Zvečer imam rad(a) mir in tišino.", 0.0927f),
+        Trditev("q_chores", "Gospodinjska opravila naj bodo razdeljena po dogovorjenem razporedu.", 0.0906f),
+        Trditev("q_guests", "Vesel(a) sem, če so v stanovanju pogosto obiski.", 0.0866f),
+        Trditev("q_pets", "V stanovanju bi rad(a) imel(a) hišnega ljubljenčka.", 0.0843f),
+        Trditev("q_study", "Doma se pogosto učim in takrat potrebujem mir.", 0.0830f),
+        Trditev("q_overnight", "Ne moti me, če gostje ali partner(ka) prespijo v stanovanju.", 0.0801f),
+        Trditev("q_wake", "Zjutraj vstajam zgodaj in zvečer hodim zgodaj spat.", 0.0731f)
     )
 }
